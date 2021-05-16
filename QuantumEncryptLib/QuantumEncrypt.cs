@@ -9,63 +9,84 @@ namespace QuantumEncryptLib
         const int CIPHER_VERSION_LEN = 2;
         const int CIPHER_SERIAL_NO_LEN = 75;
         const int CIPHER_START = CIPHER_VERSION_LEN + CIPHER_SERIAL_NO_LEN;
+        const int ENCRYPTION_START_LOCATION_LEN = 25;
+        const int _VERSION_LEN = 2;
+        const int _SERIAL_LEN = 75;
+        const int _HEADERLEN = _VERSION_LEN + _SERIAL_LEN;
         public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo)
         {
             //var serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
-            var i = 0;
-            var encryptedBytes = ECDC(arr, cipher);
-            foreach(char c in serialNo.ToCharArray())
-            {
-                result[i] = (byte)c;
-                i++;
-            }
+            var idxResult = 0;
+            var encryptedBytes = ECDC(arr, 0, cipher, arr.Length);
             var encryptionBegin = 100 + fileName.Length;
-            var startLocation = string.Format("{0, 25}", encryptionBegin);
-            foreach (char c in startLocation.ToCharArray())
-            {
-                result[i] = (byte)c;
-                i++;
-            }
-            foreach (char c in fileName.ToCharArray())
-            {
-                result[i] = (byte)c;
-                i++;
-            }
-            foreach (byte x in encryptedBytes)
-            {
-                result[i++] += ((byte)x);
-            }
+            var startLocation = encryptionBegin.ToString("D25");
+
+            CopyStringToByteArray(serialNo, ref result, ref idxResult);
+            CopyStringToByteArray(startLocation, ref result, ref idxResult);
+            CopyStringToByteArray(fileName, ref result, ref idxResult);
+            encryptedBytes.CopyTo(result, idxResult);
+
+            //var newResult = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
+            //var idxNew = 0;
+            //foreach (char c in serialNo.ToCharArray())
+            //{
+            //    newResult[idxNew++] = (byte)c;
+            //}
+            //foreach (char c in startLocation.ToCharArray())
+            //{
+            //    newResult[idxNew++] = (byte)c;
+            //}
+            //foreach (char c in fileName.ToCharArray())
+            //{
+            //    newResult[idxNew++] = (byte)c;
+            //}
+            //foreach (byte x in encryptedBytes)
+            //{
+            //    newResult[idxNew++] += ((byte)x);
+            //}
 
             return result;
-            //return ECDC(arr, result, fileName.Length, cipher, i);
         }
         
+        public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
+        {
+            foreach (char c in str.ToCharArray())
+            {
+                arrDestination[idxDestination++] = (byte)c;
+            }
+        }
+        public static string CopyBytesToString(byte[] arr, int idx, int len)
+        {
+            var newArr = new byte[len];
+            var endLoc = idx + len;
+            var j = 0;
+            for(int i = idx; i < endLoc; i++)
+            {
+                newArr[j++] = arr[i];
+            }
+            var str = Encoding.Default.GetString(newArr);
+
+            return str;
+        }
         public static byte[] Decrypt(byte[] arr, string cipher)
         {
-            var newArr = new byte[25];
-            int x = CIPHER_SERIAL_NO_LEN;
-            // 1. Get the starting location of the encrypted bytes.
-            for (int i = 0; i < 25; i++)
-            {
-                int cByte = (int)arr[x++];
-                newArr[i] = ((byte)x);
-            }
-            var isstring = Encoding.Default.GetString(newArr);
-            var isDouble = BitConverter.ToDouble(newArr, 16);
-            var startOfEncrypt = Convert.ToDouble(newArr.ToString());
+            var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
+            double startLoc = 0;
+            Double.TryParse(startLocStr, out startLoc);
+            var newArrayLen = arr.Length - (int)startLoc;
 
-            return ECDC(newArr, cipher);
+            return ECDC(arr, (int)startLoc, cipher, newArrayLen);
         }
 
-        private static byte[] ECDC(byte[] arr, string cipher)
+        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen)
         {
             int idxCipher = CIPHER_START - 1;
-            var result = new byte[arr.Length];
+            var result = new byte[newArrayLen];
             var idxResult = 0;
-            foreach (byte x in arr)
+            for (int idx = idxArr; idx < arr.Length; idx++)
             {
-                int y = ((int)cipher[idxCipher] ^ (int)x);
+                int y = ((int)cipher[idxCipher] ^ (int)arr[idx]);
                 result[idxResult] += ((byte)y);
                 idxCipher++;
                 idxResult++;
@@ -73,17 +94,32 @@ namespace QuantumEncryptLib
             return result;
         }
 
+        //public static double GetEncryptionStartLocation()
+        //{
+        //    Double.TryParse(startLocation, out dblVal);
+        //}
         public static int GetEncryptedFileLen(int fileToEncryptLen, int fileNameLen)
         {
-            return fileToEncryptLen + 100 + fileNameLen + 16;
+            return fileToEncryptLen + 100 + fileNameLen;
         }
 
         public static int GetCipherLen(int fileToEncryptLen)
         {
-            var _VERSION_LEN = 2;
-            var _SERIAL_LEN = 75;
-            var _HEADERLEN = _VERSION_LEN + _SERIAL_LEN;
-            return _HEADERLEN + fileToEncryptLen + 8;
+
+            return _HEADERLEN + fileToEncryptLen;
+        }
+        public static int GetMaxFileSizeForEncryption(string cipherString)
+        {
+            return cipherString.Length - _HEADERLEN;
+        }
+
+        public static string GetSerialNumberFromCipher(string cipherString)
+        {
+            return cipherString.Substring(2, _SERIAL_LEN);
+        }
+        public static string GetVersionNumberFromCipher(string cipherString)
+        {
+            return cipherString.Substring(0, _VERSION_LEN);
         }
 
         public static string GenerateRandomCryptographicKey(int keyLength)

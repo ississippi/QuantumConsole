@@ -19,6 +19,7 @@ namespace DesktopProto2
         byte[] encryptedBytes;
         string cipher;
         string serialNo;
+        string cipherVersion = "10";
         public QuantumEncryptForm()
         {
             InitializeComponent();
@@ -26,9 +27,9 @@ namespace DesktopProto2
             btnSave.Enabled = false;
             rbAutoGenerateCipher.Checked = true;
 
-            openFileDialog1.FileName = "Select a text file";
-            openFileDialog1.Filter = "Text files (*.txt)|*.txt";
-            openFileDialog1.Title = "Open text file";
+            openFileDialog1.FileName = "Select a file to encrypt";
+            openFileDialog1.Filter = "All files (*.*)|*.*";
+            openFileDialog1.Title = "Open file to encrypt";
 
             saveFileDialog1.Filter = "QuantumLock Files (*.qlock)|*.qlock";
             saveFileDialog1.Title = "Save a QuantumLock File";
@@ -36,6 +37,9 @@ namespace DesktopProto2
             openCipherDialog.FileName = "Select a cipher file";
             openCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
             openCipherDialog.Title = "Open cipher file";
+
+            saveCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
+            saveCipherDialog.Title = "Save cipher file";
         }
 
         private void SetText(string text)
@@ -55,8 +59,9 @@ namespace DesktopProto2
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
 
                     var cipherLen = QuantumEncrypt.GetCipherLen(unEncryptedBytes.Length);
-                    cipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
                     serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
+                    var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
+                    cipher = cipherVersion + serialNo + newCipher;
                     
                     // About to Encrypt, start a timer
                     var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -73,23 +78,36 @@ namespace DesktopProto2
                     txtEncryptedFileSize.Text = encryptedBytes.Length.ToString();
                     btnSave.Enabled = true;
                 }
-                catch (SecurityException ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
+                    MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
                     $"Details:\n\n{ex.StackTrace}");
                 }
             }
         }
+        private void btnDecrypt_Click(object sender, EventArgs e)
+        {
+            // About to Encrypt, start a timer
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var decryptedBytes = QuantumEncrypt.Decrypt(encryptedBytes, cipher);
+            watch.Stop();
+            txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
+            // Encryption Completed.
 
+            txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
+            txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
+            btnSave.Enabled = true;
+        }
 
         private void loadCipher_Click(object sender, EventArgs e)
         {
             // use a filter to load .cipher file
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            if (openCipherDialog.ShowDialog() == DialogResult.OK)
             {
-                var arr = File.ReadAllBytes(openFileDialog1.FileName);
+                var arr = File.ReadAllBytes(openCipherDialog.FileName);
                 btnLoadandEncrypt.Enabled = false;
                 btnSave.Enabled = false;
+                txtCipherFileName.Text = openCipherDialog.FileName;
             }
 
         }
@@ -105,6 +123,7 @@ namespace DesktopProto2
                     fs.Write(Encoding.ASCII.GetBytes(cipher), 0, cipher.Length);
                     fs.Flush();
                     fs.Close();
+                    txtCipherFileName.Text = Path.GetFileName(saveCipherDialog.FileName);
                 }
             }
         }
@@ -115,6 +134,10 @@ namespace DesktopProto2
             btnLoadCipher.Visible = true;
             btnLoadandEncrypt.Enabled = false;
             btnSave.Enabled = false;
+            txtCipherFileName.Enabled = true;
+            txtCipherSerialNo.Enabled = false;
+            txtInputFileSize.Enabled = false;
+            txtEncryptedFilename.Enabled = true;
         }
 
         private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
@@ -123,6 +146,10 @@ namespace DesktopProto2
             btnLoadCipher.Visible = false;
             btnLoadandEncrypt.Enabled = false;
             btnSave.Enabled = false;
+            txtCipherFileName.Enabled = false;
+            txtCipherSerialNo.Enabled = true;
+            txtInputFileSize.Enabled = true;
+            txtEncryptedFilename.Enabled = true;
         }
 
         private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
@@ -131,6 +158,10 @@ namespace DesktopProto2
             btnLoadCipher.Visible = false;
             btnLoadandEncrypt.Enabled = true;
             btnSave.Enabled = false;
+            txtCipherFileName.Enabled = false;
+            txtCipherSerialNo.Enabled = false;
+            txtInputFileSize.Enabled = true;
+            txtEncryptedFilename.Enabled = false;
         }
 
         private void btnRandomizeSerialNo_Click(object sender, EventArgs e)
@@ -157,33 +188,59 @@ namespace DesktopProto2
         {
             if (openCipherDialog.ShowDialog() == DialogResult.OK)
             {
-                try
+                var arr = File.ReadAllBytes(openCipherDialog.FileName);
+                btnLoadandEncrypt.Enabled = false;
+                btnSave.Enabled = false;
+                cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
+                txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(cipher).ToString();
+                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(cipher);
+            }
+
+        }
+
+
+
+        private void btnSaveCipher_Click(object sender, EventArgs e)
+        {
+            if (saveCipherDialog.ShowDialog() == DialogResult.OK)
+            {
+                var cipherBytes = new byte[cipher.Length];
+                var idx = 0;
+                QuantumEncrypt.CopyStringToByteArray(cipher, ref cipherBytes, ref idx);
+                if (saveCipherDialog.FileName != "")
                 {
-                }
-                catch (SecurityException ex)
-                {
-                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
-                    $"Details:\n\n{ex.StackTrace}");
+                    // default extension for saved encrypted files to be .qlock
+                    FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
+                    fs.Write(cipherBytes, 0, cipher.Length);
+                    fs.Flush();
+                    fs.Close();
                 }
             }
         }
 
-        private void btnDecrypt_Click(object sender, EventArgs e)
+        private void cipherFileName_TextChanged(object sender, EventArgs e)
         {
-            // About to Encrypt, start a timer
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            var decryptedBytes = QuantumEncrypt.Decrypt(encryptedBytes, cipher);
-            watch.Stop();
-            txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
-            // Encryption Completed.
 
-            txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
-            //txtEncryptedFilename.Text = fileToEncryptFilename;
-            //txtCipherSerialNo.Text = serialNo;
-            //txtCipherFileSize.Text = cipherLen.ToString();
-            //txtInputFileSize.Text = unEncryptedBytes.Length.ToString();
-            txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
-            btnSave.Enabled = true;
+        }
+
+        private void txtEncryptedFilename_Enter(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    //var sr = new StreamReader(openFileDialog1.FileName);
+                    var unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
+                    var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
+                    txtEncryptedFilename.Text = fileToEncryptFilename;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
+                    $"Details:\n\n{ex.StackTrace}");
+                }
+            }
         }
     }
 }

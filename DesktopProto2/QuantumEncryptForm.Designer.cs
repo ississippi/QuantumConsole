@@ -33,14 +33,13 @@ namespace DesktopProto2
             this.txtCipherSerialNo = new System.Windows.Forms.TextBox();
             this.txtOutputWindow = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.btnLoadCipher = new System.Windows.Forms.Button();
             this.rbUseExistingCipher = new System.Windows.Forms.RadioButton();
             this.rbGenerateNewCipher = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
             this.btnGenerateCipher = new System.Windows.Forms.Button();
             this.maxEncryptFileSize = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.cipherFileName = new System.Windows.Forms.TextBox();
+            this.txtCipherFileName = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.txtEncryptedFilename = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -58,7 +57,7 @@ namespace DesktopProto2
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.btnDecrypt = new System.Windows.Forms.Button();
             this.saveCipherDialog = new System.Windows.Forms.SaveFileDialog();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnSaveCipher = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.openCipherDialog = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
@@ -94,16 +93,6 @@ namespace DesktopProto2
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // btnLoadCipher
-            // 
-            this.btnLoadCipher.Location = new System.Drawing.Point(63, 117);
-            this.btnLoadCipher.Name = "btnLoadCipher";
-            this.btnLoadCipher.Size = new System.Drawing.Size(158, 23);
-            this.btnLoadCipher.TabIndex = 3;
-            this.btnLoadCipher.Text = "Load Cipher";
-            this.btnLoadCipher.UseVisualStyleBackColor = true;
-            this.btnLoadCipher.Click += new System.EventHandler(this.loadCipher_Click);
             // 
             // rbUseExistingCipher
             // 
@@ -146,6 +135,7 @@ namespace DesktopProto2
             this.btnGenerateCipher.TabIndex = 7;
             this.btnGenerateCipher.Text = "Generate Cipher";
             this.btnGenerateCipher.UseVisualStyleBackColor = true;
+            this.btnGenerateCipher.Visible = false;
             this.btnGenerateCipher.Click += new System.EventHandler(this.generateCipher_Click);
             // 
             // maxEncryptFileSize
@@ -166,13 +156,14 @@ namespace DesktopProto2
             this.label2.TabIndex = 9;
             this.label2.Text = "Max File Size";
             // 
-            // cipherFileName
+            // txtCipherFileName
             // 
-            this.cipherFileName.Location = new System.Drawing.Point(63, 200);
-            this.cipherFileName.Name = "cipherFileName";
-            this.cipherFileName.Size = new System.Drawing.Size(230, 23);
-            this.cipherFileName.TabIndex = 10;
-            this.cipherFileName.Enter += new System.EventHandler(this.cipherFileName_Enter);
+            this.txtCipherFileName.Location = new System.Drawing.Point(63, 200);
+            this.txtCipherFileName.Name = "txtCipherFileName";
+            this.txtCipherFileName.Size = new System.Drawing.Size(230, 23);
+            this.txtCipherFileName.TabIndex = 10;
+            this.txtCipherFileName.TextChanged += new System.EventHandler(this.cipherFileName_TextChanged);
+            this.txtCipherFileName.Enter += new System.EventHandler(this.cipherFileName_Enter);
             // 
             // label3
             // 
@@ -190,6 +181,7 @@ namespace DesktopProto2
             this.txtEncryptedFilename.Name = "txtEncryptedFilename";
             this.txtEncryptedFilename.Size = new System.Drawing.Size(230, 23);
             this.txtEncryptedFilename.TabIndex = 12;
+            this.txtEncryptedFilename.Enter += new System.EventHandler(this.txtEncryptedFilename_Enter);
             // 
             // label4
             // 
@@ -220,6 +212,7 @@ namespace DesktopProto2
             this.btnRandomizeSerialNo.TabIndex = 15;
             this.btnRandomizeSerialNo.Text = "Randomize";
             this.btnRandomizeSerialNo.UseVisualStyleBackColor = true;
+            this.btnRandomizeSerialNo.Visible = false;
             this.btnRandomizeSerialNo.Click += new System.EventHandler(this.btnRandomizeSerialNo_Click);
             // 
             // txtEncryptedFileSize
@@ -316,15 +309,16 @@ namespace DesktopProto2
             this.btnDecrypt.UseVisualStyleBackColor = true;
             this.btnDecrypt.Click += new System.EventHandler(this.btnDecrypt_Click);
             // 
-            // button1
+            // btnSaveCipher
             // 
-            this.button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.button1.Location = new System.Drawing.Point(63, 466);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(230, 46);
-            this.button1.TabIndex = 26;
-            this.button1.Text = "Save Cipher";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnSaveCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSaveCipher.Location = new System.Drawing.Point(63, 466);
+            this.btnSaveCipher.Name = "btnSaveCipher";
+            this.btnSaveCipher.Size = new System.Drawing.Size(230, 46);
+            this.btnSaveCipher.TabIndex = 26;
+            this.btnSaveCipher.Text = "Save Cipher";
+            this.btnSaveCipher.UseVisualStyleBackColor = true;
+            this.btnSaveCipher.Click += new System.EventHandler(this.btnSaveCipher_Click);
             // 
             // label9
             // 
@@ -346,7 +340,7 @@ namespace DesktopProto2
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnSaveCipher);
             this.Controls.Add(this.btnDecrypt);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.label8);
@@ -362,14 +356,13 @@ namespace DesktopProto2
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtEncryptedFilename);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.cipherFileName);
+            this.Controls.Add(this.txtCipherFileName);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.maxEncryptFileSize);
             this.Controls.Add(this.btnGenerateCipher);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.rbGenerateNewCipher);
             this.Controls.Add(this.rbUseExistingCipher);
-            this.Controls.Add(this.btnLoadCipher);
             this.Controls.Add(this.txtOutputWindow);
             this.Controls.Add(this.txtCipherSerialNo);
             this.Controls.Add(this.btnLoadandEncrypt);
@@ -386,14 +379,13 @@ namespace DesktopProto2
         private System.Windows.Forms.TextBox txtCipherSerialNo;
         private System.Windows.Forms.TextBox txtOutputWindow;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.Button btnLoadCipher;
         private System.Windows.Forms.RadioButton rbUseExistingCipher;
         private System.Windows.Forms.RadioButton rbGenerateNewCipher;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnGenerateCipher;
         private System.Windows.Forms.TextBox maxEncryptFileSize;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox cipherFileName;
+        private System.Windows.Forms.TextBox txtCipherFileName;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtEncryptedFilename;
         private System.Windows.Forms.Label label4;
@@ -411,7 +403,7 @@ namespace DesktopProto2
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Button btnDecrypt;
         private System.Windows.Forms.SaveFileDialog saveCipherDialog;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnSaveCipher;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.OpenFileDialog openCipherDialog;
     }
