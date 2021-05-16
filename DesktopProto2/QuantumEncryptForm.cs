@@ -16,10 +16,11 @@ namespace DesktopProto2
 {
     public partial class QuantumEncryptForm : Form
     {
-        byte[] encryptedBytes;
-        string cipher;
-        string serialNo;
-        string cipherVersion = "10";
+        byte[] _encryptedBytes;
+        byte[] _unEncryptedBytes;
+        string _cipher;
+        string _serialNo;
+        string _cipherVersion = "10";
         public QuantumEncryptForm()
         {
             InitializeComponent();
@@ -51,31 +52,29 @@ namespace DesktopProto2
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                //C:\Users\issis\Downloads\prj-directives-final\prj-directives-final
                 try
                 {
-                    //var sr = new StreamReader(openFileDialog1.FileName);
-                    var unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
+                    _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
 
-                    var cipherLen = QuantumEncrypt.GetCipherLen(unEncryptedBytes.Length);
-                    serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
+                    var cipherLen = QuantumEncrypt.GetCipherLen(_unEncryptedBytes.Length);
+                    _serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
                     var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
-                    cipher = cipherVersion + serialNo + newCipher;
-                    
+                    _cipher = _cipherVersion + _serialNo + newCipher;
+
                     // About to Encrypt, start a timer
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, unEncryptedBytes, cipher, serialNo);
+                    _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo);
                     watch.Stop();
                     txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                     // Encryption Completed.
 
-                    txtOutputWindow.Text = QuantumEncrypt.HexDump(encryptedBytes);
+                    txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
                     txtEncryptedFilename.Text = fileToEncryptFilename;
-                    txtCipherSerialNo.Text = serialNo;
+                    txtCipherSerialNo.Text = _serialNo;
                     txtCipherFileSize.Text = cipherLen.ToString();
-                    txtInputFileSize.Text = unEncryptedBytes.Length.ToString();
-                    txtEncryptedFileSize.Text = encryptedBytes.Length.ToString();
+                    txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
+                    txtEncryptedFileSize.Text = _encryptedBytes.Length.ToString();
                     btnSave.Enabled = true;
                 }
                 catch (Exception ex)
@@ -85,11 +84,33 @@ namespace DesktopProto2
                 }
             }
         }
+
+        private void btnEncrypt_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // About to Encrypt, start a timer
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo);
+                watch.Stop();
+                txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
+                // Encryption Completed.
+
+                txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
+                btnSave.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
+                $"Details:\n\n{ex.StackTrace}");
+            }
+        }
+
         private void btnDecrypt_Click(object sender, EventArgs e)
         {
             // About to Encrypt, start a timer
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var decryptedBytes = QuantumEncrypt.Decrypt(encryptedBytes, cipher);
+            var decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher);
             watch.Stop();
             txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
             // Encryption Completed.
@@ -97,19 +118,6 @@ namespace DesktopProto2
             txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
             txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
             btnSave.Enabled = true;
-        }
-
-        private void loadCipher_Click(object sender, EventArgs e)
-        {
-            // use a filter to load .cipher file
-            if (openCipherDialog.ShowDialog() == DialogResult.OK)
-            {
-                var arr = File.ReadAllBytes(openCipherDialog.FileName);
-                btnLoadandEncrypt.Enabled = false;
-                btnSave.Enabled = false;
-                txtCipherFileName.Text = openCipherDialog.FileName;
-            }
-
         }
 
         private void generateCipher_Click(object sender, EventArgs e)
@@ -120,7 +128,7 @@ namespace DesktopProto2
                 {
                     // default extension for saved encrypted files to be .qlock
                     FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
-                    fs.Write(Encoding.ASCII.GetBytes(cipher), 0, cipher.Length);
+                    fs.Write(Encoding.ASCII.GetBytes(_cipher), 0, _cipher.Length);
                     fs.Flush();
                     fs.Close();
                     txtCipherFileName.Text = Path.GetFileName(saveCipherDialog.FileName);
@@ -131,7 +139,6 @@ namespace DesktopProto2
         private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
         {
             btnGenerateCipher.Visible = false;
-            btnLoadCipher.Visible = true;
             btnLoadandEncrypt.Enabled = false;
             btnSave.Enabled = false;
             txtCipherFileName.Enabled = true;
@@ -143,7 +150,6 @@ namespace DesktopProto2
         private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
         {
             btnGenerateCipher.Visible = true;
-            btnLoadCipher.Visible = false;
             btnLoadandEncrypt.Enabled = false;
             btnSave.Enabled = false;
             txtCipherFileName.Enabled = false;
@@ -155,7 +161,6 @@ namespace DesktopProto2
         private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
         {
             btnGenerateCipher.Visible = false;
-            btnLoadCipher.Visible = false;
             btnLoadandEncrypt.Enabled = true;
             btnSave.Enabled = false;
             txtCipherFileName.Enabled = false;
@@ -177,10 +182,10 @@ namespace DesktopProto2
                 {
                     // default extension for saved encrypted files to be .qlock
                     FileStream fs = (System.IO.FileStream)saveFileDialog1.OpenFile();
-                    fs.Write(encryptedBytes,0,encryptedBytes.Length);
+                    fs.Write(_encryptedBytes, 0, _encryptedBytes.Length);
                     fs.Flush();
                     fs.Close();
-                } 
+                }
             }
         }
 
@@ -191,10 +196,11 @@ namespace DesktopProto2
                 var arr = File.ReadAllBytes(openCipherDialog.FileName);
                 btnLoadandEncrypt.Enabled = false;
                 btnSave.Enabled = false;
-                cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
+                _cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
+                _serialNo = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
-                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(cipher).ToString();
-                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(cipher);
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
+                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
             }
 
         }
@@ -205,14 +211,14 @@ namespace DesktopProto2
         {
             if (saveCipherDialog.ShowDialog() == DialogResult.OK)
             {
-                var cipherBytes = new byte[cipher.Length];
+                var cipherBytes = new byte[_cipher.Length];
                 var idx = 0;
-                QuantumEncrypt.CopyStringToByteArray(cipher, ref cipherBytes, ref idx);
+                QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherBytes, ref idx);
                 if (saveCipherDialog.FileName != "")
                 {
                     // default extension for saved encrypted files to be .qlock
                     FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
-                    fs.Write(cipherBytes, 0, cipher.Length);
+                    fs.Write(cipherBytes, 0, _cipher.Length);
                     fs.Flush();
                     fs.Close();
                 }
@@ -231,7 +237,7 @@ namespace DesktopProto2
                 try
                 {
                     //var sr = new StreamReader(openFileDialog1.FileName);
-                    var unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
+                    _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
                     txtEncryptedFilename.Text = fileToEncryptFilename;
                 }
@@ -242,5 +248,7 @@ namespace DesktopProto2
                 }
             }
         }
+
+
     }
 }

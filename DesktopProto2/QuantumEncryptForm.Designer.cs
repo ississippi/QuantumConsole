@@ -60,14 +60,15 @@ namespace DesktopProto2
             this.btnSaveCipher = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.openCipherDialog = new System.Windows.Forms.OpenFileDialog();
+            this.btnEncrypt = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnLoadandEncrypt
             // 
             this.btnLoadandEncrypt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnLoadandEncrypt.Location = new System.Drawing.Point(63, 370);
+            this.btnLoadandEncrypt.Location = new System.Drawing.Point(63, 417);
             this.btnLoadandEncrypt.Name = "btnLoadandEncrypt";
-            this.btnLoadandEncrypt.Size = new System.Drawing.Size(116, 41);
+            this.btnLoadandEncrypt.Size = new System.Drawing.Size(230, 41);
             this.btnLoadandEncrypt.TabIndex = 0;
             this.btnLoadandEncrypt.Text = "Load and Encrypt";
             this.btnLoadandEncrypt.UseVisualStyleBackColor = true;
@@ -87,7 +88,7 @@ namespace DesktopProto2
             this.txtOutputWindow.Multiline = true;
             this.txtOutputWindow.Name = "txtOutputWindow";
             this.txtOutputWindow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtOutputWindow.Size = new System.Drawing.Size(667, 420);
+            this.txtOutputWindow.Size = new System.Drawing.Size(667, 466);
             this.txtOutputWindow.TabIndex = 2;
             // 
             // openFileDialog1
@@ -290,7 +291,7 @@ namespace DesktopProto2
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSave.Location = new System.Drawing.Point(63, 417);
+            this.btnSave.Location = new System.Drawing.Point(63, 464);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(230, 42);
             this.btnSave.TabIndex = 24;
@@ -312,7 +313,7 @@ namespace DesktopProto2
             // btnSaveCipher
             // 
             this.btnSaveCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSaveCipher.Location = new System.Drawing.Point(63, 466);
+            this.btnSaveCipher.Location = new System.Drawing.Point(63, 512);
             this.btnSaveCipher.Name = "btnSaveCipher";
             this.btnSaveCipher.Size = new System.Drawing.Size(230, 46);
             this.btnSaveCipher.TabIndex = 26;
@@ -334,11 +335,23 @@ namespace DesktopProto2
             // 
             this.openCipherDialog.FileName = "openFileDialog2";
             // 
+            // btnEncrypt
+            // 
+            this.btnEncrypt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnEncrypt.Location = new System.Drawing.Point(63, 370);
+            this.btnEncrypt.Name = "btnEncrypt";
+            this.btnEncrypt.Size = new System.Drawing.Size(103, 41);
+            this.btnEncrypt.TabIndex = 28;
+            this.btnEncrypt.Text = "Encrypt";
+            this.btnEncrypt.UseVisualStyleBackColor = true;
+            this.btnEncrypt.Click += new System.EventHandler(this.btnEncrypt_Click);
+            // 
             // QuantumEncryptForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
+            this.Controls.Add(this.btnEncrypt);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.btnSaveCipher);
             this.Controls.Add(this.btnDecrypt);
@@ -406,6 +419,7 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnSaveCipher;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.OpenFileDialog openCipherDialog;
+        private System.Windows.Forms.Button btnEncrypt;
     }
 }
 
