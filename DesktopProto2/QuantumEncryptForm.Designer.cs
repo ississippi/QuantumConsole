@@ -61,6 +61,7 @@ namespace DesktopProto2
             this.label9 = new System.Windows.Forms.Label();
             this.openCipherDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnEncrypt = new System.Windows.Forms.Button();
+            this.progressBarECDC = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // btnLoadandEncrypt
@@ -346,11 +347,19 @@ namespace DesktopProto2
             this.btnEncrypt.UseVisualStyleBackColor = true;
             this.btnEncrypt.Click += new System.EventHandler(this.btnEncrypt_Click);
             // 
+            // progressBarECDC
+            // 
+            this.progressBarECDC.Location = new System.Drawing.Point(309, 559);
+            this.progressBarECDC.Name = "progressBarECDC";
+            this.progressBarECDC.Size = new System.Drawing.Size(667, 10);
+            this.progressBarECDC.TabIndex = 29;
+            // 
             // QuantumEncryptForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
+            this.Controls.Add(this.progressBarECDC);
             this.Controls.Add(this.btnEncrypt);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.btnSaveCipher);
@@ -420,6 +429,7 @@ namespace DesktopProto2
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.OpenFileDialog openCipherDialog;
         private System.Windows.Forms.Button btnEncrypt;
+        private System.Windows.Forms.ProgressBar progressBarECDC;
     }
 }
 

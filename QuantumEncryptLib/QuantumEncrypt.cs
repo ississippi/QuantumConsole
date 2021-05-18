@@ -9,22 +9,22 @@ namespace QuantumEncryptLib
         const int CIPHER_VERSION_LEN = 2;
         const int CIPHER_SERIAL_NO_LEN = 75;
         const int CIPHER_START = CIPHER_VERSION_LEN + CIPHER_SERIAL_NO_LEN;
-        const int ENCRYPTION_START_LOCATION_LEN = 25;
-        const int _VERSION_LEN = 2;
-        const int _SERIAL_LEN = 75;
-        const int _HEADERLEN = _VERSION_LEN + _SERIAL_LEN;
-        public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo)
+        const int CIPHER_START_LOCATION_LEN = 25;
+        const int ENCRYPTED_FILE_START_LOCATION = CIPHER_SERIAL_NO_LEN + CIPHER_START_LOCATION_LEN;
+
+        public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo, IProgress<int> progress)
         {
-            fileName = fileName + ".";  //filename must end with "."
+            fileName = fileName + ":";  //filename delimiter ":"
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
             var idxResult = 0;
-            var encryptedBytes = ECDC(arr, 0, cipher, arr.Length);
-            var encryptionBegin = 100 + fileName.Length;
-            var startLocation = encryptionBegin.ToString("D25");
+            var encryptedBytes = ECDC(arr, 0, cipher, arr.Length, progress);
+            //var encryptionBegin = 100 + fileName.Length;
+            var cipherEncryptionBegin = CIPHER_START;
+            var cipherStartLocation = cipherEncryptionBegin.ToString("D25");
 
             CopyStringToByteArray(serialNo, ref result, ref idxResult);
-            CopyStringToByteArray(startLocation, ref result, ref idxResult);
-            CopyStringToByteArray(fileName, ref result, ref idxResult);
+            CopyStringToByteArray(cipherStartLocation, ref result, ref idxResult);
+            //CopyStringToByteArray(fileName, ref result, ref idxResult);
             encryptedBytes.CopyTo(result, idxResult);
 
             //var newResult = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
@@ -69,27 +69,30 @@ namespace QuantumEncryptLib
 
             return str;
         }
-        public static byte[] Decrypt(byte[] arr, string cipher)
+        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress)
         {
-            var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
-            double startLoc = 0;
-            Double.TryParse(startLocStr, out startLoc);
-            var newArrayLen = arr.Length - (int)startLoc;
+            //var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
+            //double startLoc = 0;
+            //Double.TryParse(startLocStr, out startLoc);
+            var newArrayLen = arr.Length - ENCRYPTED_FILE_START_LOCATION;
 
-            return ECDC(arr, (int)startLoc, cipher, newArrayLen);
+            return ECDC(arr, (int)ENCRYPTED_FILE_START_LOCATION, cipher, newArrayLen, progress);
         }
 
-        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen)
+        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen, IProgress<int> progress)
         {
             int idxCipher = CIPHER_START - 1;
             var result = new byte[newArrayLen];
             var idxResult = 0;
+            var amountToEncrypt = arr.Length - idxArr;
             for (int idx = idxArr; idx < arr.Length; idx++)
             {
                 int y = ((int)cipher[idxCipher] ^ (int)arr[idx]);
                 result[idxResult] += ((byte)y);
                 idxCipher++;
                 idxResult++;
+                int percentComplete = (idxResult * 100) / amountToEncrypt;
+                progress.Report(percentComplete);
             }
             return result;
         }
@@ -106,24 +109,24 @@ namespace QuantumEncryptLib
         public static int GetCipherLen(int fileToEncryptLen)
         {
 
-            return _HEADERLEN + fileToEncryptLen;
+            return CIPHER_START + fileToEncryptLen;
         }
         public static int GetMaxFileSizeForEncryption(string cipherString)
         {
-            return cipherString.Length - _HEADERLEN;
+            return cipherString.Length - CIPHER_START;
         }
         public static string GetSerialNumberFromEncryptedBytes(byte[] encryptedBytes)
         {
-            return CopyBytesToString(encryptedBytes, 0, _SERIAL_LEN);
+            return CopyBytesToString(encryptedBytes, 0, CIPHER_SERIAL_NO_LEN);
         }
 
         public static string GetSerialNumberFromCipher(string cipherString)
         {
-            return cipherString.Substring(2, _SERIAL_LEN);
+            return cipherString.Substring(2, CIPHER_SERIAL_NO_LEN);
         }
         public static string GetVersionNumberFromCipher(string cipherString)
         {
-            return cipherString.Substring(0, _VERSION_LEN);
+            return cipherString.Substring(0, CIPHER_VERSION_LEN);
         }
 
         public static string GenerateRandomCryptographicKey(int keyLength)

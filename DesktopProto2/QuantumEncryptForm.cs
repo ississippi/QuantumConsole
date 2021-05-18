@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using QuantumEncryptLib;
+using QuantumEncryptPoCDesktop;
 
 namespace DesktopProto2
 {
@@ -48,12 +49,17 @@ namespace DesktopProto2
             txtCipherSerialNo.Text = text;
         }
 
-        private void SelectButton_Click(object sender, EventArgs e)
+        private async void SelectButton_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
+                    var progress = new Progress<int>(value =>
+                    {
+                        progressBarECDC.Value = value;
+
+                    }); 
                     _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
 
@@ -64,7 +70,7 @@ namespace DesktopProto2
 
                     // About to Encrypt, start a timer
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo);
+                    await Task.Run(() => _encryptedBytes = QuantumEncrypt.Encrypt(fileToEncryptFilename, _unEncryptedBytes, _cipher, _serialNo, progress));
                     watch.Stop();
                     txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                     // Encryption Completed.
@@ -76,6 +82,9 @@ namespace DesktopProto2
                     txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
                     txtEncryptedFileSize.Text = _encryptedBytes.Length.ToString();
                     btnSave.Enabled = true;
+
+                    var dialog = new EncryptionCompleteDialog();
+                    dialog.ShowDialog();
                 }
                 catch (Exception ex)
                 {
@@ -85,13 +94,18 @@ namespace DesktopProto2
             }
         }
 
-        private void btnEncrypt_Click(object sender, EventArgs e)
+        private async void btnEncrypt_Click(object sender, EventArgs e)
         {
             try
             {
+                var progress = new Progress<int>(value =>
+                {
+                    progressBarECDC.Value = value;
+
+                });
                 // About to Encrypt, start a timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo);
+                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo, progress));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -101,31 +115,44 @@ namespace DesktopProto2
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
+                MessageBox.Show($"btnEncrypt_Click() Exception.\n\nError message: {ex.Message}\n\n" +
                 $"Details:\n\n{ex.StackTrace}");
             }
         }
 
-        private void btnDecrypt_Click(object sender, EventArgs e)
+        private async void btnDecrypt_Click(object sender, EventArgs e)
         {
-            // About to Encrypt, start a timer
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            if (!QuantumEncrypt.IsMatchForDecryption(_encryptedBytes, _cipher))
+            try
             {
-                MessageBox.Show($"Serial Numbers do not match. " +
-                    $"\nCipher: {QuantumEncrypt.GetSerialNumberFromCipher(_cipher)} +" +
-                    $"\nFile: {QuantumEncrypt.GetSerialNumberFromEncryptedBytes(_encryptedBytes)}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
+                var progress = new Progress<int>(value =>
+                {
+                    progressBarECDC.Value = value;
+
+                });                // About to Encrypt, start a timer
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                if (!QuantumEncrypt.IsMatchForDecryption(_encryptedBytes, _cipher))
+                {
+                    MessageBox.Show($"Serial Numbers do not match. " +
+                        $"\nCipher: {QuantumEncrypt.GetSerialNumberFromCipher(_cipher)} +" +
+                        $"\nFile: {QuantumEncrypt.GetSerialNumberFromEncryptedBytes(_encryptedBytes)}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+                byte[] decryptedBytes = null;
+                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, progress));
+                watch.Stop();
+                txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
+                // Encryption Completed.
+
+                txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
+                txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
+                btnSave.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"btnDecrypt_Click() Exception.\n\nError message: {ex.Message}\n\n" +
+                $"Details:\n\n{ex.StackTrace}");
             }
 
-            var decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher);
-            watch.Stop();
-            txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
-            // Encryption Completed.
-
-            txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
-            txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
-            btnSave.Enabled = true;
         }
 
         private void generateCipher_Click(object sender, EventArgs e)
