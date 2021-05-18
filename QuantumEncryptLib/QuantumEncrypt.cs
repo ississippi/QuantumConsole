@@ -15,6 +15,7 @@ namespace QuantumEncryptLib
         const int _HEADERLEN = _VERSION_LEN + _SERIAL_LEN;
         public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo)
         {
+            fileName = fileName + ".";  //filename must end with "."
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
             var idxResult = 0;
             var encryptedBytes = ECDC(arr, 0, cipher, arr.Length);
@@ -111,6 +112,10 @@ namespace QuantumEncryptLib
         {
             return cipherString.Length - _HEADERLEN;
         }
+        public static string GetSerialNumberFromEncryptedBytes(byte[] encryptedBytes)
+        {
+            return CopyBytesToString(encryptedBytes, 0, _SERIAL_LEN);
+        }
 
         public static string GetSerialNumberFromCipher(string cipherString)
         {
@@ -142,6 +147,13 @@ namespace QuantumEncryptLib
             return serial;
         }
 
+        public static bool IsMatchForDecryption(byte[] encryptedBytes, string cipher)
+        {
+            var cipherSerial = GetSerialNumberFromCipher(cipher);
+            var bytesSerial = GetSerialNumberFromEncryptedBytes(encryptedBytes);
+
+            return (cipherSerial == bytesSerial);
+        }
         /// <summary>
         /// Create a Formatted Display of the input byte array returning as a string.
         /// </summary>

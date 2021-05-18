@@ -110,6 +110,14 @@ namespace DesktopProto2
         {
             // About to Encrypt, start a timer
             var watch = System.Diagnostics.Stopwatch.StartNew();
+            if (!QuantumEncrypt.IsMatchForDecryption(_encryptedBytes, _cipher))
+            {
+                MessageBox.Show($"Serial Numbers do not match. " +
+                    $"\nCipher: {QuantumEncrypt.GetSerialNumberFromCipher(_cipher)} +" +
+                    $"\nFile: {QuantumEncrypt.GetSerialNumberFromEncryptedBytes(_encryptedBytes)}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
             var decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher);
             watch.Stop();
             txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
