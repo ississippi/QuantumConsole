@@ -17,6 +17,7 @@ namespace DesktopProto2
 {
     public partial class QuantumEncryptForm : Form
     {
+        const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
         byte[] _unEncryptedBytes;
         string _cipher;
@@ -29,7 +30,7 @@ namespace DesktopProto2
             btnSave.Enabled = false;
             rbAutoGenerateCipher.Checked = true;
 
-            openFileDialog1.FileName = "Select a file to encrypt";
+            openFileDialog1.FileName = SELECT_A_FILE_TO_ENCRYPT;
             openFileDialog1.Filter = "All files (*.*)|*.*";
             openFileDialog1.Title = "Open file to encrypt";
 
@@ -49,8 +50,10 @@ namespace DesktopProto2
             txtCipherSerialNo.Text = text;
         }
 
-        private async void SelectButton_Click(object sender, EventArgs e)
+        private async void LoadAndEncrypt_Click(object sender, EventArgs e)
         {
+            openFileDialog1.FileName = SELECT_A_FILE_TO_ENCRYPT;
+
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -63,25 +66,18 @@ namespace DesktopProto2
                     _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
 
-                    var cipherLen = QuantumEncrypt.GetCipherLen(_unEncryptedBytes.Length);
-                    _serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
-                    var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
-                    _cipher = _cipherVersion + _serialNo + newCipher;
+                    _cipher = GetRandomCipher();
 
                     // About to Encrypt, start a timer
                     var watch = System.Diagnostics.Stopwatch.StartNew();
                     await Task.Run(() => _encryptedBytes = QuantumEncrypt.Encrypt(fileToEncryptFilename, _unEncryptedBytes, _cipher, _serialNo, progress));
                     watch.Stop();
                     txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
+                    txtEncryptedFilename.Text = fileToEncryptFilename;
                     // Encryption Completed.
 
-                    txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
-                    txtEncryptedFilename.Text = fileToEncryptFilename;
-                    txtCipherSerialNo.Text = _serialNo;
-                    txtCipherFileSize.Text = cipherLen.ToString();
-                    txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
-                    txtEncryptedFileSize.Text = _encryptedBytes.Length.ToString();
                     btnSave.Enabled = true;
+                    UpdateFormFields();
 
                     var dialog = new EncryptionCompleteDialog();
                     dialog.ShowDialog();
@@ -103,15 +99,20 @@ namespace DesktopProto2
                     progressBarECDC.Value = value;
 
                 });
+                var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
+
                 // About to Encrypt, start a timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(openFileDialog1.FileName, _unEncryptedBytes, _cipher, _serialNo, progress));
+                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(fileToEncryptFilename, _unEncryptedBytes, _cipher, _serialNo, progress));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
 
-                txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
                 btnSave.Enabled = true;
+                UpdateFormFields();
+
+                var dialog = new EncryptionCompleteDialog();
+                dialog.ShowDialog();
             }
             catch (Exception ex)
             {
@@ -153,6 +154,22 @@ namespace DesktopProto2
                 $"Details:\n\n{ex.StackTrace}");
             }
 
+        }
+
+        private void UpdateFormFields()
+        {
+            txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
+            txtCipherSerialNo.Text = _serialNo;
+            txtCipherFileSize.Text = _cipher.Length.ToString();
+            txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
+            txtEncryptedFileSize.Text = _encryptedBytes.Length.ToString();
+        }
+        private string GetRandomCipher()
+        {
+            var cipherLen = QuantumEncrypt.GetCipherLen(_unEncryptedBytes.Length);
+            _serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
+            var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
+            return _cipherVersion + _serialNo + newCipher;
         }
 
         private void generateCipher_Click(object sender, EventArgs e)

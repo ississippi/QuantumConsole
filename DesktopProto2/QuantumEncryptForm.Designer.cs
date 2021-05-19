@@ -73,7 +73,7 @@ namespace DesktopProto2
             this.btnLoadandEncrypt.TabIndex = 0;
             this.btnLoadandEncrypt.Text = "Load and Encrypt";
             this.btnLoadandEncrypt.UseVisualStyleBackColor = true;
-            this.btnLoadandEncrypt.Click += new System.EventHandler(this.SelectButton_Click);
+            this.btnLoadandEncrypt.Click += new System.EventHandler(this.LoadAndEncrypt_Click);
             // 
             // txtCipherSerialNo
             // 

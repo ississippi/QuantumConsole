@@ -10,45 +10,65 @@ namespace QuantumEncryptLib
         const int CIPHER_SERIAL_NO_LEN = 75;
         const int CIPHER_START = CIPHER_VERSION_LEN + CIPHER_SERIAL_NO_LEN;
         const int CIPHER_START_LOCATION_LEN = 25;
-        const int ENCRYPTED_FILE_START_LOCATION = CIPHER_SERIAL_NO_LEN + CIPHER_START_LOCATION_LEN;
+        const int ENCRYPTED_FILE_PREFIX = CIPHER_SERIAL_NO_LEN + CIPHER_START_LOCATION_LEN;
 
         public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo, IProgress<int> progress)
         {
             fileName = fileName + ":";  //filename delimiter ":"
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
+            var workingArray = new byte[arr.Length + fileName.Length];
             var idxResult = 0;
-            var encryptedBytes = ECDC(arr, 0, cipher, arr.Length, progress);
-            //var encryptionBegin = 100 + fileName.Length;
+            var fileNameArr = new byte[fileName.Length];
+            var idxFNArr = 0;
+            //Copy the filename and file bytes into the same byte array
+            CopyStringToByteArray(fileName, ref fileNameArr, ref idxFNArr);
+            fileNameArr.CopyTo(workingArray, 0);
+            arr.CopyTo(workingArray, fileName.Length);
+            //Encrypt filename + file data
+            var encryptedBytes = ECDC(workingArray, 0, cipher, workingArray.Length, progress);
+
             var cipherEncryptionBegin = CIPHER_START;
             var cipherStartLocation = cipherEncryptionBegin.ToString("D25");
 
             CopyStringToByteArray(serialNo, ref result, ref idxResult);
             CopyStringToByteArray(cipherStartLocation, ref result, ref idxResult);
-            //CopyStringToByteArray(fileName, ref result, ref idxResult);
             encryptedBytes.CopyTo(result, idxResult);
-
-            //var newResult = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
-            //var idxNew = 0;
-            //foreach (char c in serialNo.ToCharArray())
-            //{
-            //    newResult[idxNew++] = (byte)c;
-            //}
-            //foreach (char c in startLocation.ToCharArray())
-            //{
-            //    newResult[idxNew++] = (byte)c;
-            //}
-            //foreach (char c in fileName.ToCharArray())
-            //{
-            //    newResult[idxNew++] = (byte)c;
-            //}
-            //foreach (byte x in encryptedBytes)
-            //{
-            //    newResult[idxNew++] += ((byte)x);
-            //}
 
             return result;
         }
-        
+        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress)
+        {
+            //var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
+            //double startLoc = 0;
+            //Double.TryParse(startLocStr, out startLoc);
+            var newArrayLen = arr.Length - ENCRYPTED_FILE_PREFIX;
+
+            var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, newArrayLen, progress);
+            var newArray = StripFileName(unencryptedWithFilename);
+
+            return newArray;
+        }
+        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen, IProgress<int> progress = null)
+        {
+            int idxCipher = CIPHER_START;
+            var result = new byte[newArrayLen];
+            var idxResult = 0;
+            var amountToEncrypt = arr.Length - idxArr;
+            for (int idx = idxArr; idx < arr.Length; idx++)
+            {
+                int y = ((int)cipher[idxCipher] ^ (int)arr[idx]);
+                result[idxResult] += ((byte)y);
+                idxCipher++;
+                idxResult++;
+                if (progress != null)
+                {
+                    int percentComplete = (idxResult * 100) / amountToEncrypt;
+                    progress.Report(percentComplete);
+                }
+            }
+            return result;
+        }
+
         public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
         {
             foreach (char c in str.ToCharArray())
@@ -61,7 +81,7 @@ namespace QuantumEncryptLib
             var newArr = new byte[len];
             var endLoc = idx + len;
             var j = 0;
-            for(int i = idx; i < endLoc; i++)
+            for (int i = idx; i < endLoc; i++)
             {
                 newArr[j++] = arr[i];
             }
@@ -69,34 +89,6 @@ namespace QuantumEncryptLib
 
             return str;
         }
-        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress)
-        {
-            //var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
-            //double startLoc = 0;
-            //Double.TryParse(startLocStr, out startLoc);
-            var newArrayLen = arr.Length - ENCRYPTED_FILE_START_LOCATION;
-
-            return ECDC(arr, (int)ENCRYPTED_FILE_START_LOCATION, cipher, newArrayLen, progress);
-        }
-
-        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen, IProgress<int> progress)
-        {
-            int idxCipher = CIPHER_START - 1;
-            var result = new byte[newArrayLen];
-            var idxResult = 0;
-            var amountToEncrypt = arr.Length - idxArr;
-            for (int idx = idxArr; idx < arr.Length; idx++)
-            {
-                int y = ((int)cipher[idxCipher] ^ (int)arr[idx]);
-                result[idxResult] += ((byte)y);
-                idxCipher++;
-                idxResult++;
-                int percentComplete = (idxResult * 100) / amountToEncrypt;
-                progress.Report(percentComplete);
-            }
-            return result;
-        }
-
         //public static double GetEncryptionStartLocation()
         //{
         //    Double.TryParse(startLocation, out dblVal);
@@ -148,6 +140,23 @@ namespace QuantumEncryptLib
             }
 
             return serial;
+        }
+
+        private static byte[] StripFileName(byte[] arr)
+        {
+            int idxInArr = 0; 
+            for(idxInArr = 0; idxInArr < arr.Length; idxInArr++)
+            {
+                if (arr[idxInArr] == 0x3A)
+                    break;
+            }
+            idxInArr = idxInArr + 1;
+            var newArray = new byte[arr.Length - (idxInArr)];
+            for(int j = 0; j < newArray.Length; j++)
+            {
+                newArray[j] = arr[idxInArr++];
+            }
+            return newArray;
         }
 
         public static bool IsMatchForDecryption(byte[] encryptedBytes, string cipher)
