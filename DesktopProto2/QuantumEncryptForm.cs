@@ -131,19 +131,26 @@ namespace DesktopProto2
 
                 });                // About to Encrypt, start a timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                if (!QuantumEncrypt.IsMatchForDecryption(_encryptedBytes, _cipher))
+                var cipherSerial = string.Empty;
+                var encryptedSerial = string.Empty;
+                if (!QuantumEncrypt.IsMatchForDecryption(_encryptedBytes, _cipher, ref cipherSerial, ref encryptedSerial))
                 {
                     MessageBox.Show($"Serial Numbers do not match. " +
-                        $"\nCipher: {QuantumEncrypt.GetSerialNumberFromCipher(_cipher)} +" +
-                        $"\nFile: {QuantumEncrypt.GetSerialNumberFromEncryptedBytes(_encryptedBytes)}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        $"\nCipher: {cipherSerial} " +
+                        $"\nFile: {encryptedSerial}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
                 byte[] decryptedBytes = null;
-                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, progress));
+                var reason = string.Empty;
+                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
-
+                if (decryptedBytes == null)
+                {
+                    MessageBox.Show($"Decryption failed. Reason: {reason}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
                 txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
                 txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
                 btnSave.Enabled = true;

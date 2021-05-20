@@ -36,13 +36,29 @@ namespace QuantumEncryptLib
 
             return result;
         }
-        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress)
+        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress, ref string reason)
         {
-            //var startLocStr = CopyBytesToString(arr, CIPHER_SERIAL_NO_LEN, ENCRYPTION_START_LOCATION_LEN);
-            //double startLoc = 0;
-            //Double.TryParse(startLocStr, out startLoc);
+            if (arr == null || arr.Length < 101)
+            {
+                reason = "File to decrypt is not loaded";
+                return null;
+            }
             var newArrayLen = arr.Length - ENCRYPTED_FILE_PREFIX;
 
+            if ((string.IsNullOrEmpty(cipher)) || newArrayLen > (cipher.Length - CIPHER_START))
+            {
+                reason = $"Cipher not large enough to decrypt file. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
+                return null;
+            }
+            var cipherSerial = string.Empty;
+            var encryptedSerial = string.Empty;
+            if (!IsMatchForDecryption(arr, cipher, ref cipherSerial, ref encryptedSerial))
+            {
+                reason = $"Serial numbers do not match. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
+                return null;
+            }
+
+            // Decrypt and remove filename from the unencrypted byte array
             var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, newArrayLen, progress);
             var newArray = StripFileName(unencryptedWithFilename);
 
@@ -130,7 +146,7 @@ namespace QuantumEncryptLib
         }
         public static string GenerateRandomSerialNumber()
         {
-            var serial = "111111111122222222223333333333444444444455555555556666666666777777777788888";
+            var serial = "111111111122222222223333333333444444444455555555556666666666777777777712345";
 
             var randomBytes = GenerateRandomCryptographicKey(75);
             var serialNumberString = "";
@@ -159,10 +175,10 @@ namespace QuantumEncryptLib
             return newArray;
         }
 
-        public static bool IsMatchForDecryption(byte[] encryptedBytes, string cipher)
+        public static bool IsMatchForDecryption(byte[] encryptedBytes, string cipher, ref string cipherSerial, ref string bytesSerial)
         {
-            var cipherSerial = GetSerialNumberFromCipher(cipher);
-            var bytesSerial = GetSerialNumberFromEncryptedBytes(encryptedBytes);
+            cipherSerial = GetSerialNumberFromCipher(cipher);
+            bytesSerial = GetSerialNumberFromEncryptedBytes(encryptedBytes);
 
             return (cipherSerial == bytesSerial);
         }
