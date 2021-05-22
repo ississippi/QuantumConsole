@@ -31,7 +31,7 @@ namespace QuantumEncryptPoCDesktop
         {
             this.btnModalSaveEncrypted = new System.Windows.Forms.Button();
             this.btnCancelEncrypted = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label_ECDCComplete = new System.Windows.Forms.Label();
             this.saveEncryptedModal = new System.Windows.Forms.SaveFileDialog();
             this.SuspendLayout();
             // 
@@ -45,6 +45,7 @@ namespace QuantumEncryptPoCDesktop
             this.btnModalSaveEncrypted.TabIndex = 0;
             this.btnModalSaveEncrypted.Text = "Save";
             this.btnModalSaveEncrypted.UseVisualStyleBackColor = true;
+            this.btnModalSaveEncrypted.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnCancelEncrypted
             // 
@@ -56,15 +57,15 @@ namespace QuantumEncryptPoCDesktop
             this.btnCancelEncrypted.Text = "Cancel";
             this.btnCancelEncrypted.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // label_ECDCComplete
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(45, 36);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(255, 32);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Encryption Complete";
+            this.label_ECDCComplete.AutoSize = true;
+            this.label_ECDCComplete.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label_ECDCComplete.Location = new System.Drawing.Point(45, 36);
+            this.label_ECDCComplete.Name = "label_ECDCComplete";
+            this.label_ECDCComplete.Size = new System.Drawing.Size(255, 32);
+            this.label_ECDCComplete.TabIndex = 2;
+            this.label_ECDCComplete.Text = "Encryption Complete";
             // 
             // EncryptionCompleteDialog
             // 
@@ -72,7 +73,7 @@ namespace QuantumEncryptPoCDesktop
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancelEncrypted;
             this.ClientSize = new System.Drawing.Size(356, 199);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.label_ECDCComplete);
             this.Controls.Add(this.btnCancelEncrypted);
             this.Controls.Add(this.btnModalSaveEncrypted);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
@@ -89,7 +90,7 @@ namespace QuantumEncryptPoCDesktop
 
         private System.Windows.Forms.Button btnModalSaveEncrypted;
         private System.Windows.Forms.Button btnCancelEncrypted;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label_ECDCComplete;
         private System.Windows.Forms.SaveFileDialog saveEncryptedModal;
     }
 }

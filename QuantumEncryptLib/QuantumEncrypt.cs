@@ -12,18 +12,29 @@ namespace QuantumEncryptLib
         const int CIPHER_START_LOCATION_LEN = 25;
         const int ENCRYPTED_FILE_PREFIX = CIPHER_SERIAL_NO_LEN + CIPHER_START_LOCATION_LEN;
 
-        public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo, IProgress<int> progress)
+        public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo, IProgress<int> progress, ref string reason)
         {
+            // 1. Validate
+            if (!IsValidForEncryption(arr, cipher, ref reason))
+                return null;
+
+            // 2. Build New Array
+            // Encrypted File Format:
+            // +------------------------------+------------------------+------------------------+------------------------------------+
+            // | 75 Byte Serial Number        | 25 Byte Location in    | Encrypted original     | Encrypted file bytes               |
+            // |                              | cipher for encryption  | filename ending in ":" |                                    |
+            // +------------------------------+------------------------+------------------------+------------------------------------+                              |             
+            //
             fileName = fileName + ":";  //filename delimiter ":"
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
             var workingArray = new byte[arr.Length + fileName.Length];
             var idxResult = 0;
             var fileNameArr = new byte[fileName.Length];
             var idxFNArr = 0;
-            //Copy the filename and file bytes into the same byte array
             CopyStringToByteArray(fileName, ref fileNameArr, ref idxFNArr);
             fileNameArr.CopyTo(workingArray, 0);
             arr.CopyTo(workingArray, fileName.Length);
+            
             //Encrypt filename + file data
             var encryptedBytes = ECDC(workingArray, 0, cipher, workingArray.Length, progress);
 
@@ -38,25 +49,9 @@ namespace QuantumEncryptLib
         }
         public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress, ref string reason)
         {
-            if (arr == null || arr.Length < 101)
-            {
-                reason = "File to decrypt is not loaded";
-                return null;
-            }
             var newArrayLen = arr.Length - ENCRYPTED_FILE_PREFIX;
-
-            if ((string.IsNullOrEmpty(cipher)) || newArrayLen > (cipher.Length - CIPHER_START))
-            {
-                reason = $"Cipher not large enough to decrypt file. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
+            if (!IsValidForDecryption(arr, cipher, newArrayLen, ref reason))
                 return null;
-            }
-            var cipherSerial = string.Empty;
-            var encryptedSerial = string.Empty;
-            if (!IsMatchForDecryption(arr, cipher, ref cipherSerial, ref encryptedSerial))
-            {
-                reason = $"Serial numbers do not match. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
-                return null;
-            }
 
             // Decrypt and remove filename from the unencrypted byte array
             var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, newArrayLen, progress);
@@ -85,6 +80,47 @@ namespace QuantumEncryptLib
             return result;
         }
 
+        private static bool IsValidForEncryption(byte[] arr, string cipher, ref string reason)
+        {
+            var isValid = true;
+            if (arr == null || arr.Length < 1)
+            {
+                reason += "File to encrypt is not loaded";
+                isValid = false;
+            }
+
+            if ((string.IsNullOrEmpty(cipher)) || arr.Length > (cipher.Length - CIPHER_START))
+            {
+                reason += $"\nCipher not large enough to encrypt file. Cipher: {cipher.Length - CIPHER_START} File: {arr.Length}";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        private static bool IsValidForDecryption(byte[] arr, string cipher, int newArrayLen, ref string reason)
+        {
+            var isValid = true;
+            if (arr == null || arr.Length < 101)
+            {
+                reason += "File to decrypt is not loaded";
+                isValid = false;
+            }
+
+            if ((string.IsNullOrEmpty(cipher)) || newArrayLen > (cipher.Length - CIPHER_START))
+            {
+                reason += $"\nCipher not large enough to decrypt file. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
+                isValid = false;
+            }
+            var cipherSerial = string.Empty;
+            var encryptedSerial = string.Empty;
+            if (!IsSerialNoMatchForDecryption(arr, cipher, ref cipherSerial, ref encryptedSerial))
+            {
+                reason += $"\nSerial numbers do not match. Cipher: {cipher.Length - CIPHER_START} File: {newArrayLen}";
+                isValid = false;
+            }
+            return isValid;
+        }
         public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
         {
             foreach (char c in str.ToCharArray())
@@ -148,12 +184,12 @@ namespace QuantumEncryptLib
         {
             var serial = "111111111122222222223333333333444444444455555555556666666666777777777712345";
 
-            var randomBytes = GenerateRandomCryptographicKey(75);
-            var serialNumberString = "";
-            foreach (byte x in randomBytes)
-            {
-                //serialNumberString += (x % 10)
-            }
+            //var randomBytes = GenerateRandomCryptographicKey(75);
+            //var serialNumberString = "";
+            //foreach (byte x in randomBytes)
+            //{
+            //    //serialNumberString += (x % 10)
+            //}
 
             return serial;
         }
@@ -175,7 +211,7 @@ namespace QuantumEncryptLib
             return newArray;
         }
 
-        public static bool IsMatchForDecryption(byte[] encryptedBytes, string cipher, ref string cipherSerial, ref string bytesSerial)
+        public static bool IsSerialNoMatchForDecryption(byte[] encryptedBytes, string cipher, ref string cipherSerial, ref string bytesSerial)
         {
             cipherSerial = GetSerialNumberFromCipher(cipher);
             bytesSerial = GetSerialNumberFromEncryptedBytes(encryptedBytes);
