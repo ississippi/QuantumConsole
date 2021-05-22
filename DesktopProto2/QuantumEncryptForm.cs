@@ -205,9 +205,17 @@ namespace DesktopProto2
             txtInputFileSize.Text = (_unEncryptedBytes == null) ? string.Empty : _unEncryptedBytes.Length.ToString();
             txtEncryptedFileSize.Text = (_encryptedBytes == null) ? string.Empty : _encryptedBytes.Length.ToString();
         }
+        private void maxEncryptedFileSize_Enter(object sender, EventArgs e)
+        {
+            maxEncryptFileSize.BackColor = Color.Empty;
+        }
         private string GetRandomCipher()
         {
             var cipherLen = QuantumEncrypt.GetCipherLen(_unEncryptedBytes.Length);
+            return GetRandomCipher(cipherLen);
+        }
+        private string GetRandomCipher(int cipherLen)
+        {
             _serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
             var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
             return _cipherVersion + _serialNo + newCipher;
@@ -215,24 +223,28 @@ namespace DesktopProto2
 
         private void generateCipher_Click(object sender, EventArgs e)
         {
-            if (saveCipherDialog.ShowDialog() == DialogResult.OK)
+            if (maxEncryptFileSize.Text.Length == 0)
             {
-                if (saveCipherDialog.FileName != "")
-                {
-                    // default extension for saved encrypted files to be .qlock
-                    FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
-                    fs.Write(Encoding.ASCII.GetBytes(_cipher), 0, _cipher.Length);
-                    fs.Flush();
-                    fs.Close();
-                    txtCipherFileName.Text = Path.GetFileName(saveCipherDialog.FileName);
-                }
+                maxEncryptFileSize.Focus();
+                maxEncryptFileSize.BackColor = Color.Red;
+                MessageBox.Show($"A max encrypt file size is required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+            var cipherLen = 0;
+            int.TryParse(maxEncryptFileSize.Text, out cipherLen);
+            _cipher = GetRandomCipher(cipherLen);
+            txtCipherFileSize.Text = _cipher.Length.ToString();
+            var cipherArr = new byte[_cipher.Length];
+            var idx = 0;
+            QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherArr, ref idx);
+            txtOutputWindow.Text = QuantumEncrypt.HexDump(cipherArr);
         }
 
         private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
         {
             btnGenerateCipher.Visible = false;
             btnSave.Enabled = false;
+            maxEncryptFileSize.Enabled = false;
             txtCipherFileName.Enabled = true;
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;
@@ -243,6 +255,7 @@ namespace DesktopProto2
         {
             btnGenerateCipher.Visible = true;
             btnSave.Enabled = false;
+            maxEncryptFileSize.Enabled = true;
             txtCipherFileName.Enabled = false;
             txtCipherSerialNo.Enabled = true;
             txtInputFileSize.Enabled = false;
@@ -251,8 +264,10 @@ namespace DesktopProto2
 
         private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
         {
+            maxEncryptFileSize.Enabled = true;
             btnGenerateCipher.Visible = false;
             btnSave.Enabled = false;
+            maxEncryptFileSize.Enabled = false;
             txtCipherFileName.Enabled = false;
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;

@@ -136,6 +136,8 @@ namespace DesktopProto2
             this.maxEncryptFileSize.Size = new System.Drawing.Size(230, 23);
             this.maxEncryptFileSize.TabIndex = 8;
             this.maxEncryptFileSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.maxEncryptFileSize.Click += new System.EventHandler(this.maxEncryptedFileSize_Enter);
+            this.maxEncryptFileSize.Enter += new System.EventHandler(this.maxEncryptedFileSize_Enter);
             // 
             // label2
             // 
