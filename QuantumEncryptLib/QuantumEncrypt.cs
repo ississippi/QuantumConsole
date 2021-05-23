@@ -89,7 +89,12 @@ namespace QuantumEncryptLib
                 isValid = false;
             }
 
-            if ((string.IsNullOrEmpty(cipher)) || arr.Length > (cipher.Length - CIPHER_START))
+            if (string.IsNullOrEmpty(cipher))
+            {
+                reason += $"\nCipher is not loaded.";
+                isValid = false;
+            }
+            else if (arr.Length > (cipher.Length - CIPHER_START))
             {
                 reason += $"\nCipher not large enough to encrypt file. Cipher: {cipher.Length - CIPHER_START} File: {arr.Length}";
                 isValid = false;
@@ -178,7 +183,8 @@ namespace QuantumEncryptLib
             RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
             byte[] randomBytes = new byte[keyLength];
             rngCryptoServiceProvider.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
+            return Convert.ToBase64String(randomBytes).Substring(0,keyLength);
+            //return Encoding.Default.GetString(randomBytes);
         }
         public static string GenerateRandomSerialNumber()
         {

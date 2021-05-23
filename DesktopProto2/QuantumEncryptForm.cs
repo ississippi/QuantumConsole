@@ -101,6 +101,7 @@ namespace DesktopProto2
             {
                 if (_unEncryptedBytes == null)
                 {
+                    txtEncryptedFilename.BackColor = Color.Red;
                     MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -134,13 +135,12 @@ namespace DesktopProto2
 
                 var dialog = new EncryptionCompleteDialog(true, _encryptedBytes, _fileToEncryptFilename);
 
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
                 dialog.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"btnEncrypt_Click() Exception.\n\nError message: {ex.Message}\n\n" +
-                $"Details:\n\n{ex.StackTrace}");
+                MessageBox.Show($"btnEncrypt_Click() Exception.\n\nError message: {ex.Message}\n\nDetails:\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -186,13 +186,13 @@ namespace DesktopProto2
 
                 var dialog = new EncryptionCompleteDialog(false, _encryptedBytes, _fileToEncryptFilename);
 
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
                 dialog.ShowDialog();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"btnDecrypt_Click() Exception.\n\nError message: {ex.Message}\n\n" +
-                $"Details:\n\n{ex.StackTrace}");
+                $"Details:\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -225,7 +225,6 @@ namespace DesktopProto2
         {
             if (maxEncryptFileSize.Text.Length == 0)
             {
-                maxEncryptFileSize.Focus();
                 maxEncryptFileSize.BackColor = Color.Red;
                 MessageBox.Show($"A max encrypt file size is required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -281,6 +280,12 @@ namespace DesktopProto2
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            if (_encryptedBytes == null)
+            {
+                MessageBox.Show($"File is not loaded.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 if (saveFileDialog1.FileName != "")
@@ -313,6 +318,11 @@ namespace DesktopProto2
 
         private void btnSaveCipher_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(_cipher))
+            {
+                MessageBox.Show($"Cipher is not loaded.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             if (saveCipherDialog.ShowDialog() == DialogResult.OK)
             {
                 var cipherBytes = new byte[_cipher.Length];
@@ -334,27 +344,35 @@ namespace DesktopProto2
 
         }
 
-        private void txtEncryptedFilename_Enter(object sender, EventArgs e)
+        private async void txtEncryptedFilename_Enter(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            txtEncryptedFilename.BackColor = Color.Empty;
+            try
             {
-                try
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     txtInputFileSize.Text = string.Empty;
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
                     _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
+                    watch.Stop();
+                    txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
+
                     if (_unEncryptedBytes == null)
                         return;
                     var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
                     txtEncryptedFilename.Text = fileToEncryptFilename;
                     txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
-                    txtOutputWindow.Text = QuantumEncrypt.HexDump(_unEncryptedBytes);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
-                    $"Details:\n\n{ex.StackTrace}");
+                    var hexDump = string.Empty;
+                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_unEncryptedBytes));
+                    txtOutputWindow.Text = hexDump;
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Exception loading file.\n\nError message: {ex.Message}\n\n" +
+                $"Details:\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
     }
 }

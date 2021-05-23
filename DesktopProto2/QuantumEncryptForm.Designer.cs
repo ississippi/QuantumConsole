@@ -29,6 +29,7 @@ namespace DesktopProto2
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QuantumEncryptForm));
             this.txtCipherSerialNo = new System.Windows.Forms.TextBox();
             this.txtOutputWindow = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -376,6 +377,7 @@ namespace DesktopProto2
             this.Controls.Add(this.rbUseExistingCipher);
             this.Controls.Add(this.txtOutputWindow);
             this.Controls.Add(this.txtCipherSerialNo);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "QuantumEncryptForm";
             this.Text = "QuantumLock Encrypt";
             this.ResumeLayout(false);
