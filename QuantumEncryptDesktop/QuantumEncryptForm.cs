@@ -107,7 +107,10 @@ namespace DesktopProto2
                 }
 
                 if (rbAutoGenerateCipher.Checked == true)
+                {
+                    txtCipherFileName.Text = string.Empty;
                     _cipher = GetRandomCipher();
+                }
 
                 var progress = new Progress<int>(value =>
                 {
@@ -229,6 +232,7 @@ namespace DesktopProto2
                 MessageBox.Show($"A max encrypt file size is required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            txtCipherFileName.Text = string.Empty;
             var cipherLen = 0;
             int.TryParse(maxEncryptFileSize.Text, out cipherLen);
             _cipher = GetRandomCipher(cipherLen);
