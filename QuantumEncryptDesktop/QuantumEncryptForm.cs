@@ -187,7 +187,7 @@ namespace DesktopProto2
                 txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
                 btnSave.Enabled = true;
 
-                var dialog = new EncryptionCompleteDialog(false, _encryptedBytes, _fileToEncryptFilename);
+                var dialog = new EncryptionCompleteDialog(false, decryptedBytes, _fileToEncryptFilename);
 
                 //Thread.Sleep(1000);
                 dialog.ShowDialog();
