@@ -25,7 +25,7 @@ namespace QuantumEncryptLib
             // |                              | cipher for encryption  | filename ending in ":" |                                    |
             // +------------------------------+------------------------+------------------------+------------------------------------+                              |             
             //
-            fileName = fileName + ":";  //filename delimiter ":"
+            fileName += ":";  //filename delimiter ":"
             var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
             var workingArray = new byte[arr.Length + fileName.Length];
             var idxResult = 0;
@@ -180,7 +180,7 @@ namespace QuantumEncryptLib
 
         public static string GenerateRandomCryptographicKey(int keyLength)
         {
-            RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            RNGCryptoServiceProvider rngCryptoServiceProvider = new();
             byte[] randomBytes = new byte[keyLength];
             rngCryptoServiceProvider.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes).Substring(0,keyLength);
@@ -202,13 +202,13 @@ namespace QuantumEncryptLib
 
         private static byte[] StripFileName(byte[] arr)
         {
-            int idxInArr = 0; 
+            int idxInArr; 
             for(idxInArr = 0; idxInArr < arr.Length; idxInArr++)
             {
                 if (arr[idxInArr] == 0x3A)
                     break;
             }
-            idxInArr = idxInArr + 1;
+            idxInArr++;
             var newArray = new byte[arr.Length - (idxInArr)];
             for(int j = 0; j < newArray.Length; j++)
             {
@@ -252,7 +252,7 @@ namespace QuantumEncryptLib
 
             char[] line = (new String(' ', lineLength - Environment.NewLine.Length) + Environment.NewLine).ToCharArray();
             int expectedLines = (bytesLength + bytesPerLine - 1) / bytesPerLine;
-            StringBuilder result = new StringBuilder(expectedLines * lineLength);
+            StringBuilder result = new(expectedLines * lineLength);
 
             for (int i = 0; i < bytesLength; i += bytesPerLine)
             {

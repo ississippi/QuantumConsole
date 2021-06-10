@@ -23,7 +23,7 @@ namespace DesktopProto2
         byte[] _unEncryptedBytes;
         string _cipher;
         string _serialNo;
-        string _cipherVersion = "10";
+        readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
         public QuantumEncryptForm()
         {
@@ -233,8 +233,13 @@ namespace DesktopProto2
                 return;
             }
             txtCipherFileName.Text = string.Empty;
-            var cipherLen = 0;
-            int.TryParse(maxEncryptFileSize.Text, out cipherLen);
+            int cipherLen;
+            if (!int.TryParse(maxEncryptFileSize.Text, out cipherLen))
+            {
+                maxEncryptFileSize.BackColor = Color.Red;
+                MessageBox.Show($"The max encrypt file size is value is invalid.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             _cipher = GetRandomCipher(cipherLen);
             txtCipherFileSize.Text = _cipher.Length.ToString();
             var cipherArr = new byte[_cipher.Length];

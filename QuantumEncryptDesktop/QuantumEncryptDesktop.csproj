@@ -6,12 +6,17 @@
     <UseWindowsForms>true</UseWindowsForms>
     <SignAssembly>false</SignAssembly>
     <Platforms>AnyCPU;x64;x86</Platforms>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\QuantumEncryptLib\QuantumEncryptLib.csproj">
       <Private>true</Private>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
