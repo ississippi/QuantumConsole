@@ -308,23 +308,6 @@ namespace DesktopProto2
             }
         }
 
-        private void cipherFileName_Enter(object sender, EventArgs e)
-        {
-            if (openCipherDialog.ShowDialog() == DialogResult.OK)
-            {
-                var arr = File.ReadAllBytes(openCipherDialog.FileName);
-                btnSave.Enabled = false;
-                _cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
-                _serialNo = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
-                txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
-                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
-                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
-            }
-
-        }
-
-
-
         private void btnSaveCipher_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(_cipher))
@@ -348,12 +331,27 @@ namespace DesktopProto2
             }
         }
 
-        private void cipherFileName_TextChanged(object sender, EventArgs e)
+        private void cipherFileName_Enter(object sender, EventArgs e)
         {
-
+            LoadCipherFile();
         }
 
         private async void txtEncryptedFilename_Enter(object sender, EventArgs e)
+        {
+            LoadFileToEncrypt();
+        }
+
+        private void btnOpenFileToEncrypt_Click(object sender, EventArgs e)
+        {
+            LoadFileToEncrypt();
+        }
+
+        private void btnOpenCipherFile_Click(object sender, EventArgs e)
+        {
+            LoadCipherFile();
+        }
+
+        private async void LoadFileToEncrypt()
         {
             txtEncryptedFilename.BackColor = Color.Empty;
             try
@@ -383,5 +381,18 @@ namespace DesktopProto2
             }
         }
 
+        private async void LoadCipherFile()
+        {
+            if (openCipherDialog.ShowDialog() == DialogResult.OK)
+            {
+                var arr = File.ReadAllBytes(openCipherDialog.FileName);
+                btnSave.Enabled = false;
+                _cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
+                _serialNo = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
+                txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
+                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
+            }
+        }
     }
 }
