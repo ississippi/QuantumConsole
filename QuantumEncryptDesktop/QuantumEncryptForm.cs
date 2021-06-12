@@ -44,59 +44,16 @@ namespace DesktopProto2
 
             saveCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
             saveCipherDialog.Title = "Save cipher file";
+            txtCipherEncryptStartLocation.Text = "0";
         }
 
         private void SetText(string text)
         {
             txtCipherSerialNo.Text = text;
         }
-
-        //private async void LoadAndEncrypt_Click(object sender, EventArgs e)
-        //{
-        //    openFileDialog1.FileName = SELECT_A_FILE_TO_ENCRYPT;
-
-        //    if (openFileDialog1.ShowDialog() == DialogResult.OK)
-        //    {
-        //        try
-        //        {
-        //            var progress = new Progress<int>(value =>
-        //            {
-        //                progressBarECDC.Value = value;
-
-        //            }); 
-        //            _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
-        //            var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
-
-        //            _cipher = GetRandomCipher();
-
-        //            var reason = string.Empty;
-        //            // --------- About to Encrypt, start a timer ---------------
-        //            var watch = System.Diagnostics.Stopwatch.StartNew();
-        //            await Task.Run(() => _encryptedBytes = QuantumEncrypt.Encrypt(fileToEncryptFilename, _unEncryptedBytes, _cipher, _serialNo, progress, ref reason));
-        //            watch.Stop();
-        //            txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
-        //            txtEncryptedFilename.Text = fileToEncryptFilename;
-        //            // Encryption Completed.
-        //            if (_encryptedBytes == null)
-        //                MessageBox.Show($"Encryption failed.\n\nReason: {reason}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-        //            btnSave.Enabled = true;
-        //            UpdateFormFields();
-
-        //            var dialog = new EncryptionCompleteDialog(_encryptedBytes, fileToEncryptFilename);
-        //            Thread.Sleep(1000);
-        //            dialog.ShowDialog();
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show($"Exception.\n\nError message: {ex.Message}\n\n" +
-        //            $"Details:\n\n{ex.StackTrace}");
-        //        }
-        //    }
-        //}
-
         private async void btnEncrypt_Click(object sender, EventArgs e)
         {
+            int cipherStartLocation;
             try
             {
                 if (_unEncryptedBytes == null)
@@ -105,7 +62,18 @@ namespace DesktopProto2
                     MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
+                if (txtCipherEncryptStartLocation.Text.Length < 1)
+                {
+                    txtCipherEncryptStartLocation.BackColor = Color.Red;
+                    MessageBox.Show($"Must specify a value for \"Cipher Start Location After Reserved Bytes\".\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (!Int32.TryParse(txtCipherEncryptStartLocation.Text, out cipherStartLocation))
+                {
+                    txtCipherEncryptStartLocation.BackColor = Color.Red;
+                    MessageBox.Show($"Cipher Start Location After Reserved Bytes value is invalid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 if (rbAutoGenerateCipher.Checked == true)
                 {
                     txtCipherFileName.Text = string.Empty;
@@ -122,7 +90,7 @@ namespace DesktopProto2
                 // About to Encrypt, start a timer
                 var reason = string.Empty;
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipher, _serialNo, progress, ref reason));
+                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipher, cipherStartLocation, _serialNo, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -161,7 +129,15 @@ namespace DesktopProto2
                 {
                     progressBarECDC.Value = value;
 
-                });                // About to Encrypt, start a timer
+                });
+
+                var cipherStartLocation = QuantumEncrypt.GetCipherStartLocation(_encryptedBytes);
+                if (cipherStartLocation < 0 || cipherStartLocation > _cipher.Length)
+                {
+                    MessageBox.Show($"Cipher Start Location from the encrypted file is not valid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                // About to Encrypt, start a timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 var cipherSerial = string.Empty;
                 var encryptedSerial = string.Empty;
@@ -174,7 +150,7 @@ namespace DesktopProto2
                 }
                 byte[] decryptedBytes = null;
                 var reason = string.Empty;
-                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, progress, ref reason));
+                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, cipherStartLocation, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -257,6 +233,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Text = "0";
         }
 
         private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
@@ -268,6 +245,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = true;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Text = "0";
         }
 
         private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
@@ -280,6 +258,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Text = "0";
         }
 
         private void btnRandomizeSerialNo_Click(object sender, EventArgs e)
@@ -287,6 +266,10 @@ namespace DesktopProto2
             txtCipherSerialNo.Text = QuantumEncrypt.GenerateRandomSerialNumber();
         }
 
+        private void txtCipherEncryptStartLocation_Enter(object sender, EventArgs e)
+        {
+            txtCipherEncryptStartLocation.BackColor = Color.Empty;
+        }
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (_encryptedBytes == null)

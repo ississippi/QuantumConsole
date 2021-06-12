@@ -9,13 +9,14 @@ namespace QuantumEncryptLib
         const int CIPHER_VERSION_LEN = 2;
         const int CIPHER_SERIAL_NO_LEN = 75;
         const int CIPHER_START = CIPHER_VERSION_LEN + CIPHER_SERIAL_NO_LEN;
+        const int CIPHER_RESERVED_BYTES = CIPHER_VERSION_LEN + CIPHER_SERIAL_NO_LEN;
         const int CIPHER_START_LOCATION_LEN = 25;
         const int ENCRYPTED_FILE_PREFIX = CIPHER_SERIAL_NO_LEN + CIPHER_START_LOCATION_LEN;
 
-        public static byte[] Encrypt(string fileName, byte[] arr, string cipher, string serialNo, IProgress<int> progress, ref string reason)
+        public static byte[] Encrypt(string fileName, byte[] arrToEncrypt, string cipher, int cipherEncryptStart, string serialNo, IProgress<int> progress, ref string reason)
         {
             // 1. Validate
-            if (!IsValidForEncryption(arr, cipher, ref reason))
+            if (!IsValidForEncryption(arrToEncrypt, cipher, cipherEncryptStart, ref reason))
                 return null;
 
             // 2. Build New Array
@@ -26,20 +27,21 @@ namespace QuantumEncryptLib
             // +------------------------------+------------------------+------------------------+------------------------------------+                              |             
             //
             fileName += ":";  //filename delimiter ":"
-            var result = new byte[GetEncryptedFileLen(arr.Length, fileName.Length)];
-            var workingArray = new byte[arr.Length + fileName.Length];
+            var result = new byte[GetEncryptedFileLen(arrToEncrypt.Length, fileName.Length)];
+            var workingArray = new byte[arrToEncrypt.Length + fileName.Length];
             var idxResult = 0;
             var fileNameArr = new byte[fileName.Length];
             var idxFNArr = 0;
             CopyStringToByteArray(fileName, ref fileNameArr, ref idxFNArr);
             fileNameArr.CopyTo(workingArray, 0);
-            arr.CopyTo(workingArray, fileName.Length);
-            
-            //Encrypt filename + file data
-            var encryptedBytes = ECDC(workingArray, 0, cipher, workingArray.Length, progress);
-
-            var cipherEncryptionBegin = CIPHER_START;
+            arrToEncrypt.CopyTo(workingArray, fileName.Length);
+            var cipherEncryptionBegin = CIPHER_RESERVED_BYTES + cipherEncryptStart;
             var cipherStartLocation = cipherEncryptionBegin.ToString("D25");
+
+
+            //Encrypt filename + file data
+            var encryptedBytes = ECDC(workingArray, 0, cipher, cipherEncryptionBegin, workingArray.Length, progress);
+
 
             CopyStringToByteArray(serialNo, ref result, ref idxResult);
             CopyStringToByteArray(cipherStartLocation, ref result, ref idxResult);
@@ -47,21 +49,21 @@ namespace QuantumEncryptLib
 
             return result;
         }
-        public static byte[] Decrypt(byte[] arr, string cipher, IProgress<int> progress, ref string reason)
+        public static byte[] Decrypt(byte[] arr, string cipher, int cipherEncryptionBegin, IProgress<int> progress, ref string reason)
         {
             var newArrayLen = arr.Length - ENCRYPTED_FILE_PREFIX;
             if (!IsValidForDecryption(arr, cipher, newArrayLen, ref reason))
                 return null;
 
             // Decrypt and remove filename from the unencrypted byte array
-            var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, newArrayLen, progress);
+            var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, cipherEncryptionBegin, newArrayLen, progress);
             var newArray = StripFileName(unencryptedWithFilename);
 
             return newArray;
         }
-        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int newArrayLen, IProgress<int> progress = null)
+        private static byte[] ECDC(byte[] arr, int idxArr, string cipher, int cipherEncryptionBegin, int newArrayLen, IProgress<int> progress = null)
         {
-            int idxCipher = CIPHER_START;
+            int idxCipher = cipherEncryptionBegin;
             var result = new byte[newArrayLen];
             var idxResult = 0;
             var amountToEncrypt = arr.Length - idxArr;
@@ -80,7 +82,7 @@ namespace QuantumEncryptLib
             return result;
         }
 
-        private static bool IsValidForEncryption(byte[] arr, string cipher, ref string reason)
+        private static bool IsValidForEncryption(byte[] arr, string cipher, int cipherEncryptStart, ref string reason)
         {
             var isValid = true;
             if (arr == null || arr.Length < 1)
@@ -88,16 +90,22 @@ namespace QuantumEncryptLib
                 reason += "File to encrypt is not loaded";
                 isValid = false;
             }
-
             if (string.IsNullOrEmpty(cipher))
             {
                 reason += $"\nCipher is not loaded.";
                 isValid = false;
             }
-            else if (arr.Length > (cipher.Length - CIPHER_START))
+            else 
             {
-                reason += $"\nCipher not large enough to encrypt file. Cipher: {cipher.Length - CIPHER_START} File: {arr.Length}";
-                isValid = false;
+                var usableCipherLen = cipher.Length - (CIPHER_RESERVED_BYTES + cipherEncryptStart);
+                if (arr.Length > usableCipherLen)
+                {
+                    reason += $"\nCipher not large enough to encrypt file. ";
+                    if (arr.Length < (cipher.Length - CIPHER_RESERVED_BYTES))
+                        reason += $"\nConsider lowering the cipher encrypt start location input value.";
+                    reason += $"\n\nFile to encrypt length: {arr.Length}\nCipher File Length: {cipher.Length}\nUsable Cipher Bytes: {usableCipherLen}\nCipher Encrypt Start Location: {cipherEncryptStart}";
+                    isValid = false;
+                }
             }
 
             return isValid;
@@ -126,6 +134,15 @@ namespace QuantumEncryptLib
             }
             return isValid;
         }
+        
+        public static int GetCipherStartLocation(byte[] arrEncrypted)
+        {
+            var strLocation = CopyBytesToString(arrEncrypted, CIPHER_SERIAL_NO_LEN, CIPHER_START_LOCATION_LEN);
+            var startLocation = -1;
+            Int32.TryParse(strLocation, out startLocation);
+
+            return startLocation;
+        }
         public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
         {
             foreach (char c in str.ToCharArray())
@@ -146,10 +163,7 @@ namespace QuantumEncryptLib
 
             return str;
         }
-        //public static double GetEncryptionStartLocation()
-        //{
-        //    Double.TryParse(startLocation, out dblVal);
-        //}
+
         public static int GetEncryptedFileLen(int fileToEncryptLen, int fileNameLen)
         {
             return fileToEncryptLen + 100 + fileNameLen;

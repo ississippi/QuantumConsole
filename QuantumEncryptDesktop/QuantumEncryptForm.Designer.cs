@@ -63,7 +63,7 @@ namespace DesktopProto2
             this.progressBarECDC = new System.Windows.Forms.ProgressBar();
             this.btnOpenFileToEncrypt = new System.Windows.Forms.Button();
             this.btnOpenCipherFile = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtCipherEncryptStartLocation = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -83,6 +83,7 @@ namespace DesktopProto2
             this.txtOutputWindow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtOutputWindow.Size = new System.Drawing.Size(667, 466);
             this.txtOutputWindow.TabIndex = 2;
+            this.txtOutputWindow.Enter += new System.EventHandler(this.txtCipherEncryptStartLocation_Enter);
             // 
             // openFileDialog1
             // 
@@ -355,21 +356,23 @@ namespace DesktopProto2
             this.btnOpenCipherFile.UseVisualStyleBackColor = true;
             this.btnOpenCipherFile.Click += new System.EventHandler(this.btnOpenCipherFile_Click);
             // 
-            // textBox1
+            // txtCipherEncryptStartLocation
             // 
-            this.textBox1.Location = new System.Drawing.Point(63, 294);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(230, 23);
-            this.textBox1.TabIndex = 32;
+            this.txtCipherEncryptStartLocation.Location = new System.Drawing.Point(63, 294);
+            this.txtCipherEncryptStartLocation.Name = "txtCipherEncryptStartLocation";
+            this.txtCipherEncryptStartLocation.Size = new System.Drawing.Size(230, 23);
+            this.txtCipherEncryptStartLocation.TabIndex = 32;
+            this.txtCipherEncryptStartLocation.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtCipherEncryptStartLocation.Enter += new System.EventHandler(this.txtCipherEncryptStartLocation_Enter);
             // 
             // label10
             // 
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(63, 276);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(118, 15);
+            this.label10.Size = new System.Drawing.Size(228, 15);
             this.label10.TabIndex = 33;
-            this.label10.Text = "Cipher Start Location";
+            this.label10.Text = "Cipher Start Location After Reserved Bytes";
             // 
             // QuantumEncryptForm
             // 
@@ -377,7 +380,7 @@ namespace DesktopProto2
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
             this.Controls.Add(this.label10);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.txtCipherEncryptStartLocation);
             this.Controls.Add(this.btnOpenCipherFile);
             this.Controls.Add(this.btnOpenFileToEncrypt);
             this.Controls.Add(this.progressBarECDC);
@@ -449,7 +452,7 @@ namespace DesktopProto2
         private System.Windows.Forms.ProgressBar progressBarECDC;
         private System.Windows.Forms.Button btnOpenFileToEncrypt;
         private System.Windows.Forms.Button btnOpenCipherFile;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtCipherEncryptStartLocation;
         private System.Windows.Forms.Label label10;
     }
 }
