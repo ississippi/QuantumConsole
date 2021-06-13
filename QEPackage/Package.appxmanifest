@@ -8,12 +8,12 @@
 
   <Identity
     Name="e6fe3cd7-f050-4644-9738-5a1158db1f85"
-    Publisher="CN=QuantumPoC"
-    Version="1.0.10.0" />
+    Publisher="CN=Gary Smith"
+    Version="1.0.7.0" />
 
   <Properties>
     <DisplayName>QuantumEncrypt</DisplayName>
-    <PublisherDisplayName>Gary</PublisherDisplayName>
+    <PublisherDisplayName>Gary Smith</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
