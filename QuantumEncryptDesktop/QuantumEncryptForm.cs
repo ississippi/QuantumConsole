@@ -44,6 +44,7 @@ namespace DesktopProto2
 
             saveCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
             saveCipherDialog.Title = "Save cipher file";
+            txtCipherEncryptStartLocation.Enabled = true;
             txtCipherEncryptStartLocation.Text = "0";
         }
 
@@ -86,6 +87,7 @@ namespace DesktopProto2
 
                 });
                 _fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
+                txtCipherEncryptStartLocation.Enabled = true;
 
                 // About to Encrypt, start a timer
                 var reason = string.Empty;
@@ -100,7 +102,7 @@ namespace DesktopProto2
                     MessageBox.Show($"Encryption failed.\n\nReason: {reason}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
+                txtCipherEncryptStartLocation.Enabled = false;
                 btnSave.Enabled = true;
                 UpdateFormFields();
 
@@ -148,6 +150,8 @@ namespace DesktopProto2
                         $"\nFile: {encryptedSerial}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+                // Passed all validations, proceed to decryption
+                txtCipherEncryptStartLocation.Enabled = true;
                 byte[] decryptedBytes = null;
                 var reason = string.Empty;
                 await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, cipherStartLocation, progress, ref reason));
@@ -233,6 +237,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Enabled = true;
             txtCipherEncryptStartLocation.Text = "0";
         }
 
@@ -245,6 +250,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = true;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Enabled = false;
             txtCipherEncryptStartLocation.Text = "0";
         }
 
@@ -258,6 +264,7 @@ namespace DesktopProto2
             txtCipherSerialNo.Enabled = false;
             txtInputFileSize.Enabled = false;
             txtEncryptedFilename.Enabled = true;
+            txtCipherEncryptStartLocation.Enabled = true;
             txtCipherEncryptStartLocation.Text = "0";
         }
 
@@ -336,6 +343,7 @@ namespace DesktopProto2
 
         private async void LoadFileToEncrypt()
         {
+            txtCipherEncryptStartLocation.Enabled = true;
             txtEncryptedFilename.BackColor = Color.Empty;
             try
             {
