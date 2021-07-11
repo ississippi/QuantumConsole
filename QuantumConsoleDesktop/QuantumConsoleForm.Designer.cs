@@ -1,7 +1,7 @@
 ﻿
 namespace DesktopProto2
 {
-    partial class QuantumEncryptForm
+    partial class QuantumConsoleForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -29,7 +29,7 @@ namespace DesktopProto2
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QuantumEncryptForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QuantumConsoleForm));
             this.txtCipherSerialNo = new System.Windows.Forms.TextBox();
             this.txtOutputWindow = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -65,6 +65,7 @@ namespace DesktopProto2
             this.btnOpenCipherFile = new System.Windows.Forms.Button();
             this.txtCipherEncryptStartLocation = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
+            this.btnGetNewCipher = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtCipherSerialNo
@@ -338,7 +339,7 @@ namespace DesktopProto2
             // 
             // btnOpenFileToEncrypt
             // 
-            this.btnOpenFileToEncrypt.Image = global::QuantumEncryptDesktop.Properties.Resources.icons8_folder_16;
+            this.btnOpenFileToEncrypt.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
             this.btnOpenFileToEncrypt.Location = new System.Drawing.Point(268, 200);
             this.btnOpenFileToEncrypt.Name = "btnOpenFileToEncrypt";
             this.btnOpenFileToEncrypt.Size = new System.Drawing.Size(25, 23);
@@ -348,7 +349,7 @@ namespace DesktopProto2
             // 
             // btnOpenCipherFile
             // 
-            this.btnOpenCipherFile.Image = global::QuantumEncryptDesktop.Properties.Resources.icons8_folder_16;
+            this.btnOpenCipherFile.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
             this.btnOpenCipherFile.Location = new System.Drawing.Point(268, 246);
             this.btnOpenCipherFile.Name = "btnOpenCipherFile";
             this.btnOpenCipherFile.Size = new System.Drawing.Size(25, 23);
@@ -374,11 +375,22 @@ namespace DesktopProto2
             this.label10.TabIndex = 33;
             this.label10.Text = "Cipher Start Location After Reserved Bytes";
             // 
-            // QuantumEncryptForm
+            // btnGetNewCipher
+            // 
+            this.btnGetNewCipher.Location = new System.Drawing.Point(63, 36);
+            this.btnGetNewCipher.Name = "btnGetNewCipher";
+            this.btnGetNewCipher.Size = new System.Drawing.Size(199, 23);
+            this.btnGetNewCipher.TabIndex = 34;
+            this.btnGetNewCipher.Text = "TestGetNewCipher";
+            this.btnGetNewCipher.UseVisualStyleBackColor = true;
+            this.btnGetNewCipher.Click += new System.EventHandler(this.btnGetNewCipher_Click);
+            // 
+            // QuantumConsoleForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
+            this.Controls.Add(this.btnGetNewCipher);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.txtCipherEncryptStartLocation);
             this.Controls.Add(this.btnOpenCipherFile);
@@ -411,7 +423,7 @@ namespace DesktopProto2
             this.Controls.Add(this.txtOutputWindow);
             this.Controls.Add(this.txtCipherSerialNo);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "QuantumEncryptForm";
+            this.Name = "QuantumConsoleForm";
             this.Text = "QuantumLock Encrypt";
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -454,6 +466,7 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnOpenCipherFile;
         private System.Windows.Forms.TextBox txtCipherEncryptStartLocation;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button btnGetNewCipher;
     }
 }
 

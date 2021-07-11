@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\QuantumEncryptLib\QuantumEncryptLib.csproj">
       <Private>true</Private>
     </ProjectReference>
@@ -21,12 +25,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="QuantumConsoleResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>QuantumConsoleResources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="QuantumConsoleResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>QuantumConsoleResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -13,10 +13,11 @@ using System.Windows.Forms;
 
 using QuantumEncryptLib;
 using QuantumEncryptPoCDesktop;
+using QuantumConsoleDesktop.Providers;
 
 namespace DesktopProto2
 {
-    public partial class QuantumEncryptForm : Form
+    public partial class QuantumConsoleForm : Form
     {
         const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
@@ -25,7 +26,7 @@ namespace DesktopProto2
         string _serialNo;
         readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
-        public QuantumEncryptForm()
+        public QuantumConsoleForm()
         {
             InitializeComponent();
             btnSave.Enabled = false;
@@ -384,6 +385,14 @@ namespace DesktopProto2
                 maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
                 txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
             }
+        }
+
+        private async void btnGetNewCipher_Click(object sender, EventArgs e)
+        {
+            //var c = await QuantumHubProvider.GetNewCipher(1, 200);
+            var c = await QuantumHubProvider.GetNewCipher(1, 200);
+
+            return;
         }
     }
 }
