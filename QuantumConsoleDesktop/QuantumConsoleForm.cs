@@ -389,10 +389,10 @@ namespace DesktopProto2
             }
         }
 
-        private async void btnGetNewCipher_Click(object sender, EventArgs e)
+        private async void btnGetCipherList_Click(object sender, EventArgs e)
         {
             //var c = await QuantumHubProvider.GetNewCipher(1, 200);
-            var c = await QuantumHubProvider.GetNewCipher(1, 200);
+            var c = await QuantumHubProvider.GetCipherList(1);
 
             return;
         }

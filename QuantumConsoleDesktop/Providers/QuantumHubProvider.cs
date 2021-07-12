@@ -76,6 +76,41 @@ namespace QuantumConsoleDesktop.Providers
 
             return cipher;
         }
+
+        public async static Task<List<Cipher>> GetCipherList(int userId)
+        {
+            List<Cipher> list = null;
+            try
+            {
+                var h = await HealthCheck();
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SharedAccessSignature", sBToken);
+                    //HttpContent httpContent = new StringContent(JsonSerializer.Serialize<NewCipherRequest>(n));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(userId));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string getNewCipherPath = "/api/Cipher/GetCipherList";
+                    var response = await httpClient.PostAsync(getNewCipherPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    //var baseResponse = JsonSerializer.Deserialize<BaseResponse<Cipher>>(content);
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<List<Cipher>>>(content);
+                    list = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return list;
+        }
     }
 }
 

@@ -381,9 +381,9 @@ namespace DesktopProto2
             this.btnGetNewCipher.Name = "btnGetNewCipher";
             this.btnGetNewCipher.Size = new System.Drawing.Size(199, 23);
             this.btnGetNewCipher.TabIndex = 34;
-            this.btnGetNewCipher.Text = "TestGetNewCipher";
+            this.btnGetNewCipher.Text = "TestGetCipherList";
             this.btnGetNewCipher.UseVisualStyleBackColor = true;
-            this.btnGetNewCipher.Click += new System.EventHandler(this.btnGetNewCipher_Click);
+            this.btnGetNewCipher.Click += new System.EventHandler(this.btnGetCipherList_Click);
             // 
             // QuantumConsoleForm
             // 
