@@ -205,7 +205,7 @@ namespace DesktopProto2
             return _cipherVersion + _serialNo + newCipher;
         }
 
-        private void generateCipher_Click(object sender, EventArgs e)
+        private async void generateCipher_Click(object sender, EventArgs e)
         {
             if (maxEncryptFileSize.Text.Length == 0)
             {
@@ -221,7 +221,9 @@ namespace DesktopProto2
                 MessageBox.Show($"The max encrypt file size is value is invalid.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            _cipher = GetRandomCipher(cipherLen);
+            //_cipher = GetRandomCipher(cipherLen);
+            var cipherObject = await QuantumHubProvider.GetNewCipher(1, cipherLen);
+            _cipher = cipherObject.cipherString;
             txtCipherFileSize.Text = _cipher.Length.ToString();
             var cipherArr = new byte[_cipher.Length];
             var idx = 0;

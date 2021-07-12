@@ -129,7 +129,7 @@ namespace DesktopProto2
             this.btnGenerateCipher.Name = "btnGenerateCipher";
             this.btnGenerateCipher.Size = new System.Drawing.Size(158, 23);
             this.btnGenerateCipher.TabIndex = 7;
-            this.btnGenerateCipher.Text = "Generate Cipher";
+            this.btnGenerateCipher.Text = "Get New Cipher";
             this.btnGenerateCipher.UseVisualStyleBackColor = true;
             this.btnGenerateCipher.Visible = false;
             this.btnGenerateCipher.Click += new System.EventHandler(this.generateCipher_Click);
