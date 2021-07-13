@@ -65,7 +65,7 @@ namespace DesktopProto2
             this.btnOpenCipherFile = new System.Windows.Forms.Button();
             this.txtCipherEncryptStartLocation = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.btnGetNewCipher = new System.Windows.Forms.Button();
+            this.btnTestAPI = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtCipherSerialNo
@@ -375,22 +375,22 @@ namespace DesktopProto2
             this.label10.TabIndex = 33;
             this.label10.Text = "Cipher Start Location After Reserved Bytes";
             // 
-            // btnGetNewCipher
+            // btnTestAPI
             // 
-            this.btnGetNewCipher.Location = new System.Drawing.Point(63, 36);
-            this.btnGetNewCipher.Name = "btnGetNewCipher";
-            this.btnGetNewCipher.Size = new System.Drawing.Size(199, 23);
-            this.btnGetNewCipher.TabIndex = 34;
-            this.btnGetNewCipher.Text = "TestGetCipherList";
-            this.btnGetNewCipher.UseVisualStyleBackColor = true;
-            this.btnGetNewCipher.Click += new System.EventHandler(this.btnGetCipherList_Click);
+            this.btnTestAPI.Location = new System.Drawing.Point(63, 36);
+            this.btnTestAPI.Name = "btnTestAPI";
+            this.btnTestAPI.Size = new System.Drawing.Size(199, 23);
+            this.btnTestAPI.TabIndex = 34;
+            this.btnTestAPI.Text = "TestAPI";
+            this.btnTestAPI.UseVisualStyleBackColor = true;
+            this.btnTestAPI.Click += new System.EventHandler(this.btnTestAPI_Click);
             // 
             // QuantumConsoleForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 594);
-            this.Controls.Add(this.btnGetNewCipher);
+            this.Controls.Add(this.btnTestAPI);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.txtCipherEncryptStartLocation);
             this.Controls.Add(this.btnOpenCipherFile);
@@ -466,7 +466,7 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnOpenCipherFile;
         private System.Windows.Forms.TextBox txtCipherEncryptStartLocation;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button btnGetNewCipher;
+        private System.Windows.Forms.Button btnTestAPI;
     }
 }
 

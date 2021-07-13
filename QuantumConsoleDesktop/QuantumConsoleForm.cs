@@ -13,6 +13,7 @@ using System.Windows.Forms;
 
 using QuantumEncryptLib;
 using QuantumEncryptPoCDesktop;
+using QuantumConsoleDesktop.Models;
 using QuantumConsoleDesktop.Providers;
 
 namespace DesktopProto2
@@ -389,10 +390,34 @@ namespace DesktopProto2
             }
         }
 
-        private async void btnGetCipherList_Click(object sender, EventArgs e)
+        private async void btnTestAPI_Click(object sender, EventArgs e)
         {
             //var c = await QuantumHubProvider.GetNewCipher(1, 200);
-            var c = await QuantumHubProvider.GetCipherList(1);
+            //var c = await QuantumHubProvider.GetCipherList(1);
+            //var cipherSend = new CipherSend
+            //{
+            //    cipherId = 5,
+            //    senderUserId = 1,
+            //    recipientUserId = 3,
+            //    startingPoint = 0
+            //};
+            //var c = await QuantumHubProvider.SendCipher(cipherSend);
+
+            //var acceptDeny = new CipherAcceptDeny
+            //{
+            //    CipherSendRequestId = 3,
+            //    AcceptDeny = "Accepted"
+            //};
+            //var c = await QuantumHubProvider.AcceptDeny(acceptDeny);
+
+            //var cipherRequest = new CipherRequest
+            //{
+            //    UserId = 1,
+            //    CipherId = 4
+            //};
+            //var c = await QuantumHubProvider.GetCipher(cipherRequest);
+
+            var c = await QuantumHubProvider.GetNotifications(3);
 
             return;
         }

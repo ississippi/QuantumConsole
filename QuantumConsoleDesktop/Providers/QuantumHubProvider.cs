@@ -96,11 +96,137 @@ namespace QuantumConsoleDesktop.Providers
                     HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(userId));
                     httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                    string getNewCipherPath = "/api/Cipher/GetCipherList";
-                    var response = await httpClient.PostAsync(getNewCipherPath, httpContent);
+                    string getCipherListPath = "/api/Cipher/GetCipherList";
+                    var response = await httpClient.PostAsync(getCipherListPath, httpContent);
                     var content = await response.Content.ReadAsStringAsync();
                     //var baseResponse = JsonSerializer.Deserialize<BaseResponse<Cipher>>(content);
                     var baseResponse = JsonConvert.DeserializeObject<BaseResponse<List<Cipher>>>(content);
+                    list = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return list;
+        }
+
+        public async static Task<int> SendCipher(CipherSend cs)
+        {
+            var sendId = -1;
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SharedAccessSignature", sBToken);
+                    //HttpContent httpContent = new StringContent(JsonSerializer.Serialize<NewCipherRequest>(n));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(cs));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string sendCipherPath = "/api/Cipher/SendCipher";
+                    var response = await httpClient.PostAsync(sendCipherPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<int>>(content);
+                    sendId = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return sendId;
+        }
+
+        public async static Task<Cipher> AcceptDeny(CipherAcceptDeny ad)
+        {
+            Cipher cipher = null;
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SharedAccessSignature", sBToken);
+                    //HttpContent httpContent = new StringContent(JsonSerializer.Serialize<NewCipherRequest>(n));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(ad));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string acceptDenyPath = "/api/Cipher/AcceptDenyCipher";
+                    var response = await httpClient.PostAsync(acceptDenyPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<Cipher>>(content);
+                    cipher = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return cipher;
+        }
+
+        public async static Task<Cipher> GetCipher(CipherRequest cr)
+        {
+            Cipher cipher = null;
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(cr));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string getCipherPath = "/api/Cipher/GetCipher";
+                    var response = await httpClient.PostAsync(getCipherPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<Cipher>>(content);
+                    cipher = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return cipher;
+        }
+
+        public async static Task<CipherSendList> GetNotifications(int userId)
+        {
+            CipherSendList list = null;
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(userId));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string getNotificationsPath = "/api/Notifications/GetNotifications";
+                    var response = await httpClient.PostAsync(getNotificationsPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<CipherSendList>>(content);
                     list = baseResponse.Data;
                 }
             }
