@@ -225,6 +225,7 @@ namespace DesktopProto2
             //_cipher = GetRandomCipher(cipherLen);
             var cipherObject = await QuantumHubProvider.GetNewCipher(1, cipherLen);
             _cipher = cipherObject.cipherString;
+            SaveCipher();
             txtCipherFileSize.Text = _cipher.Length.ToString();
             var cipherArr = new byte[_cipher.Length];
             var idx = 0;
@@ -304,25 +305,7 @@ namespace DesktopProto2
 
         private void btnSaveCipher_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(_cipher))
-            {
-                MessageBox.Show($"Cipher is not loaded.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            if (saveCipherDialog.ShowDialog() == DialogResult.OK)
-            {
-                var cipherBytes = new byte[_cipher.Length];
-                var idx = 0;
-                QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherBytes, ref idx);
-                if (saveCipherDialog.FileName != "")
-                {
-                    // default extension for saved encrypted files to be .qlock
-                    FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
-                    fs.Write(cipherBytes, 0, _cipher.Length);
-                    fs.Flush();
-                    fs.Close();
-                }
-            }
+            SaveCipher();
         }
 
         private void cipherFileName_Enter(object sender, EventArgs e)
@@ -387,6 +370,29 @@ namespace DesktopProto2
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
                 maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
                 txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
+            }
+        }
+
+        private async void SaveCipher()
+        {
+            if (string.IsNullOrEmpty(_cipher))
+            {
+                MessageBox.Show($"Cipher is not loaded.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (saveCipherDialog.ShowDialog() == DialogResult.OK)
+            {
+                var cipherBytes = new byte[_cipher.Length];
+                var idx = 0;
+                QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherBytes, ref idx);
+                if (saveCipherDialog.FileName != "")
+                {
+                    // default extension for saved encrypted files to be .qlock
+                    FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
+                    fs.Write(cipherBytes, 0, _cipher.Length);
+                    fs.Flush();
+                    fs.Close();
+                }
             }
         }
 
