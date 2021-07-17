@@ -30,8 +30,7 @@ namespace DesktopProto2
         public QuantumConsoleForm()
         {
             InitializeComponent();
-            btnSave.Enabled = false;
-            rbAutoGenerateCipher.Checked = true;
+            btnSave.Enabled = true;
 
             openFileDialog1.FileName = SELECT_A_FILE_TO_ENCRYPT;
             openFileDialog1.Filter = "All files (*.*)|*.*";
@@ -46,6 +45,7 @@ namespace DesktopProto2
 
             saveCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
             saveCipherDialog.Title = "Save cipher file";
+
             txtCipherEncryptStartLocation.Enabled = true;
             txtCipherEncryptStartLocation.Text = "0";
         }
@@ -65,6 +65,13 @@ namespace DesktopProto2
                     MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+                if (string.IsNullOrEmpty(_cipher))
+                {
+                    txtCipherFileName.BackColor = Color.Red;
+                    btnLoadSelectedCipher.BackColor = Color.Red;
+                    MessageBox.Show($"No cipher loaded. \n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 if (txtCipherEncryptStartLocation.Text.Length < 1)
                 {
                     txtCipherEncryptStartLocation.BackColor = Color.Red;
@@ -76,11 +83,6 @@ namespace DesktopProto2
                     txtCipherEncryptStartLocation.BackColor = Color.Red;
                     MessageBox.Show($"Cipher Start Location After Reserved Bytes value is invalid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
-                }
-                if (rbAutoGenerateCipher.Checked == true)
-                {
-                    txtCipherFileName.Text = string.Empty;
-                    _cipher = GetRandomCipher();
                 }
 
                 var progress = new Progress<int>(value =>
@@ -194,19 +196,9 @@ namespace DesktopProto2
         {
             maxEncryptFileSize.BackColor = Color.Empty;
         }
-        private string GetRandomCipher()
-        {
-            var cipherLen = QuantumEncrypt.GetCipherLen(_unEncryptedBytes.Length);
-            return GetRandomCipher(cipherLen);
-        }
-        private string GetRandomCipher(int cipherLen)
-        {
-            _serialNo = QuantumEncrypt.GenerateRandomSerialNumber();
-            var newCipher = QuantumEncrypt.GenerateRandomCryptographicKey(cipherLen);
-            return _cipherVersion + _serialNo + newCipher;
-        }
 
-        private async void generateCipher_Click(object sender, EventArgs e)
+
+        private async void btnGetNewCipher_Click(object sender, EventArgs e)
         {
             if (maxEncryptFileSize.Text.Length == 0)
             {
@@ -227,56 +219,51 @@ namespace DesktopProto2
             _cipher = cipherObject.cipherString;
             SaveCipher();
             txtCipherFileSize.Text = _cipher.Length.ToString();
+            txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
             var cipherArr = new byte[_cipher.Length];
             var idx = 0;
             QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherArr, ref idx);
             txtOutputWindow.Text = QuantumEncrypt.HexDump(cipherArr);
         }
+        //private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    btnGetNewCipher.Visible = false;
+        //    btnSave.Enabled = false;
+        //    maxEncryptFileSize.Enabled = false;
+        //    txtCipherFileName.Enabled = true;
+        //    txtCipherSerialNo.Enabled = false;
+        //    txtInputFileSize.Enabled = false;
+        //    txtEncryptedFilename.Enabled = true;
+        //    txtCipherEncryptStartLocation.Enabled = true;
+        //    txtCipherEncryptStartLocation.Text = "0";
+        //}
 
-        private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
-        {
-            btnGenerateCipher.Visible = false;
-            btnSave.Enabled = false;
-            maxEncryptFileSize.Enabled = false;
-            txtCipherFileName.Enabled = true;
-            txtCipherSerialNo.Enabled = false;
-            txtInputFileSize.Enabled = false;
-            txtEncryptedFilename.Enabled = true;
-            txtCipherEncryptStartLocation.Enabled = true;
-            txtCipherEncryptStartLocation.Text = "0";
-        }
+        //private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    btnGetNewCipher.Visible = true;
+        //    btnSave.Enabled = false;
+        //    maxEncryptFileSize.Enabled = true;
+        //    txtCipherFileName.Enabled = false;
+        //    txtCipherSerialNo.Enabled = true;
+        //    txtInputFileSize.Enabled = false;
+        //    txtEncryptedFilename.Enabled = true;
+        //    txtCipherEncryptStartLocation.Enabled = false;
+        //    txtCipherEncryptStartLocation.Text = "0";
+        //}
 
-        private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
-        {
-            btnGenerateCipher.Visible = true;
-            btnSave.Enabled = false;
-            maxEncryptFileSize.Enabled = true;
-            txtCipherFileName.Enabled = false;
-            txtCipherSerialNo.Enabled = true;
-            txtInputFileSize.Enabled = false;
-            txtEncryptedFilename.Enabled = true;
-            txtCipherEncryptStartLocation.Enabled = false;
-            txtCipherEncryptStartLocation.Text = "0";
-        }
-
-        private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
-        {
-            maxEncryptFileSize.Enabled = true;
-            btnGenerateCipher.Visible = false;
-            btnSave.Enabled = false;
-            maxEncryptFileSize.Enabled = false;
-            txtCipherFileName.Enabled = false;
-            txtCipherSerialNo.Enabled = false;
-            txtInputFileSize.Enabled = false;
-            txtEncryptedFilename.Enabled = true;
-            txtCipherEncryptStartLocation.Enabled = true;
-            txtCipherEncryptStartLocation.Text = "0";
-        }
-
-        private void btnRandomizeSerialNo_Click(object sender, EventArgs e)
-        {
-            txtCipherSerialNo.Text = QuantumEncrypt.GenerateRandomSerialNumber();
-        }
+        //private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
+        //{
+        //    maxEncryptFileSize.Enabled = true;
+        //    btnGetNewCipher.Visible = false;
+        //    btnSave.Enabled = false;
+        //    maxEncryptFileSize.Enabled = false;
+        //    txtCipherFileName.Enabled = false;
+        //    txtCipherSerialNo.Enabled = false;
+        //    txtInputFileSize.Enabled = false;
+        //    txtEncryptedFilename.Enabled = true;
+        //    txtCipherEncryptStartLocation.Enabled = true;
+        //    txtCipherEncryptStartLocation.Text = "0";
+        //}
 
         private void txtCipherEncryptStartLocation_Enter(object sender, EventArgs e)
         {
@@ -325,6 +312,8 @@ namespace DesktopProto2
 
         private void btnOpenCipherFile_Click(object sender, EventArgs e)
         {
+            txtCipherFileName.BackColor = Color.Empty;
+            btnLoadSelectedCipher.BackColor = Color.Empty;
             LoadCipherFile();
         }
 
@@ -426,6 +415,21 @@ namespace DesktopProto2
             var c = await QuantumHubProvider.GetNotifications(3);
 
             return;
+        }
+
+        private void btnLoadSelectedCipher_Click(object sender, EventArgs e)
+        {
+        }
+
+        private async void btnRefreshCipherList_Click(object sender, EventArgs e)
+        {
+            var cipherList = await QuantumHubProvider.GetCipherList(1);
+            lvCiphers.Items.Clear();
+            foreach (Cipher c in cipherList.Ciphers)
+            {
+                lvCiphers.Items.Add("colCreated", c.createdDateTime.ToString());
+                lvCiphers.Items.Add("colSerialNumber", c.serialNumber);
+            }
         }
     }
 }

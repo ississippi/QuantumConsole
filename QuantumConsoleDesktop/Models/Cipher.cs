@@ -16,10 +16,19 @@ namespace QuantumConsoleDesktop.Models
     {
         public int cipherId { get; set; }
         public int userId { get; set; }
-        //public DateTime createdDateTime { get; set; }
+        public DateTime createdDateTime { get; set; }
         public string serialNumber { get; set; }
         public int startingPoint { get; set; }
         public string cipherString { get; set; }
+    }
+
+    public class CipherList
+    {
+        public CipherList()
+        {
+            Ciphers = new List<Cipher>();
+        }
+        public List<Cipher> Ciphers { get; set; }
     }
 
     public class CipherSend

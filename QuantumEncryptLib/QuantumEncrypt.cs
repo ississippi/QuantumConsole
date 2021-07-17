@@ -134,7 +134,7 @@ namespace QuantumEncryptLib
             }
             return isValid;
         }
-        
+
         public static int GetCipherStartLocation(byte[] arrEncrypted)
         {
             var strLocation = CopyBytesToString(arrEncrypted, CIPHER_SERIAL_NO_LEN, CIPHER_START_LOCATION_LEN);
@@ -200,20 +200,7 @@ namespace QuantumEncryptLib
             return Convert.ToBase64String(randomBytes).Substring(0,keyLength);
             //return Encoding.Default.GetString(randomBytes);
         }
-        public static string GenerateRandomSerialNumber()
-        {
-            var serial = "111111111122222222223333333333444444444455555555556666666666777777777712345";
-
-            //var randomBytes = GenerateRandomCryptographicKey(75);
-            //var serialNumberString = "";
-            //foreach (byte x in randomBytes)
-            //{
-            //    //serialNumberString += (x % 10)
-            //}
-
-            return serial;
-        }
-
+ 
         private static byte[] StripFileName(byte[] arr)
         {
             int idxInArr; 

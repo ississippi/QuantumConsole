@@ -55,9 +55,6 @@ namespace QuantumConsoleDesktop.Providers
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
                         new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SharedAccessSignature", sBToken);
-                    //HttpContent httpContent = new StringContent(JsonSerializer.Serialize<NewCipherRequest>(n));
                     HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(n));
                     httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
@@ -77,9 +74,9 @@ namespace QuantumConsoleDesktop.Providers
             return cipher;
         }
 
-        public async static Task<List<Cipher>> GetCipherList(int userId)
+        public async static Task<CipherList> GetCipherList(int userId)
         {
-            List<Cipher> list = null;
+            CipherList list = null;
             try
             {
                 var h = await HealthCheck();
@@ -100,7 +97,7 @@ namespace QuantumConsoleDesktop.Providers
                     var response = await httpClient.PostAsync(getCipherListPath, httpContent);
                     var content = await response.Content.ReadAsStringAsync();
                     //var baseResponse = JsonSerializer.Deserialize<BaseResponse<Cipher>>(content);
-                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<List<Cipher>>>(content);
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<CipherList>>(content);
                     list = baseResponse.Data;
                 }
             }
