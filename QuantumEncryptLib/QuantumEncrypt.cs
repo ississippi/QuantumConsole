@@ -231,6 +231,14 @@ namespace QuantumEncryptLib
         /// <param name="bytes"></param>
         /// <param name="bytesPerLine"></param>
         /// <returns></returns>
+        public static string HexDump(string hexThis)
+        {
+            var hexThisArray = new byte[hexThis.Length];
+            var idxByteArray = 0;
+            CopyStringToByteArray(hexThis, ref hexThisArray, ref idxByteArray);
+            return HexDump(hexThisArray);
+        }
+
         public static string HexDump(byte[] bytes, int bytesPerLine = 16)
         {
             if (bytes == null) return "<null>";

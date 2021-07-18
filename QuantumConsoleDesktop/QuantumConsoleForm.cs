@@ -20,11 +20,13 @@ namespace DesktopProto2
 {
     public partial class QuantumConsoleForm : Form
     {
+        int _userId = 1;
         const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
         byte[] _unEncryptedBytes;
         string _cipher;
         string _serialNo;
+        CipherList _cipherList = null;
         readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
         public QuantumConsoleForm()
@@ -353,7 +355,7 @@ namespace DesktopProto2
             if (openCipherDialog.ShowDialog() == DialogResult.OK)
             {
                 var arr = File.ReadAllBytes(openCipherDialog.FileName);
-                btnSave.Enabled = false;
+                //btnSave.Enabled = false;
                 _cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
                 _serialNo = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
@@ -387,16 +389,19 @@ namespace DesktopProto2
 
         private async void btnTestAPI_Click(object sender, EventArgs e)
         {
-            //var c = await QuantumHubProvider.GetNewCipher(1, 200);
-            //var c = await QuantumHubProvider.GetCipherList(1);
-            //var cipherSend = new CipherSend
+            //var c = await QuantumHubProvider.GetNewCipher(_userId, 200);
+            //var c = await QuantumHubProvider.GetCipherList(_userId);
+            //for(int i = 5; i < 10; i++)
             //{
-            //    cipherId = 5,
-            //    senderUserId = 1,
-            //    recipientUserId = 3,
-            //    startingPoint = 0
-            //};
-            //var c = await QuantumHubProvider.SendCipher(cipherSend);
+            //    var cipherSend = new CipherSend
+            //    {
+            //        CipherId = i,
+            //        SenderUserId = 3,
+            //        RecipientUserId = _userId,
+            //        StartingPoint = 0
+            //    };
+            //    var c = await QuantumHubProvider.SendCipher(cipherSend);
+            //}
 
             //var acceptDeny = new CipherAcceptDeny
             //{
@@ -407,29 +412,117 @@ namespace DesktopProto2
 
             //var cipherRequest = new CipherRequest
             //{
-            //    UserId = 1,
+            //    UserId = _userId,
             //    CipherId = 4
             //};
             //var c = await QuantumHubProvider.GetCipher(cipherRequest);
 
-            var c = await QuantumHubProvider.GetNotifications(3);
+            //var c = await QuantumHubProvider.GetNotifications(3);
 
             return;
         }
 
-        private void btnLoadSelectedCipher_Click(object sender, EventArgs e)
+        private async void btnLoadSelectedCipher_Click(object sender, EventArgs e)
         {
+            if (lvCipherList.SelectedItems == null || lvCipherList.SelectedItems.Count < 1)
+            {
+                MessageBox.Show($"Please click to select a cipher above.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            var it = lvCipherList.SelectedItems;
+            var createdDTStr = it[0].SubItems[0].Text;
+            var serialNo = it[0].SubItems[1].Text;
+
+            await LoadCipherFromCipherList(_cipherList, serialNo);
+
+            return;
         }
 
         private async void btnRefreshCipherList_Click(object sender, EventArgs e)
         {
-            var cipherList = await QuantumHubProvider.GetCipherList(1);
-            lvCiphers.Items.Clear();
-            foreach (Cipher c in cipherList.Ciphers)
+            _cipherList = await QuantumHubProvider.GetCipherList(1);
+            lvCipherList.Items.Clear();
+            var it = 0;
+            foreach (Cipher c in _cipherList.Ciphers)
             {
-                lvCiphers.Items.Add("colCreated", c.createdDateTime.ToString());
-                lvCiphers.Items.Add("colSerialNumber", c.serialNumber);
+                lvCipherList.Items.Add(c.createdDateTime.ToString());
+                lvCipherList.Items[it].SubItems.Add(c.serialNumber);
+                it++;
             }
+        }
+
+        private async Task LoadCipherFromCipherList(CipherList cList, string serialNumber)
+        {
+            foreach(Cipher c in cList.Ciphers)
+            {
+                if (c.serialNumber == serialNumber)
+                {
+                    _cipher = c.cipherString;
+                    _serialNo = c.serialNumber;
+                    txtCipherFileName.Text = string.Empty;
+                    txtCipherSerialNo.Text = c.serialNumber;
+                    maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
+                    var hexDump = string.Empty;
+                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipher));
+                    txtOutputWindow.Text = hexDump; 
+                    
+                    return;
+                }
+            }
+            MessageBox.Show($"The selected Cipher was not found. SerialNumber:  {serialNumber}.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private async void btnRefreshCipherRequests_Click(object sender, EventArgs e)
+        {
+            var sendList = await QuantumHubProvider.GetNotifications(_userId);
+            if (sendList.SendRequests.Count == 0)
+            {
+                MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            lvCipherRequestList.Items.Clear();
+            var it = 0;
+            foreach (CipherSend s in sendList.SendRequests)
+            {
+                lvCipherRequestList.Items.Add(s.SenderUserId.ToString());
+                lvCipherRequestList.Items[it].SubItems.Add(s.CreateDate.ToString());
+                lvCipherRequestList.Items[it].SubItems.Add(s.CipherSendId.ToString());
+                it++;
+            }
+        }
+
+        private async void lvCipherRequestList_Click(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var focusedItem = lvCipherRequestList.FocusedItem;
+                if (focusedItem != null && focusedItem.Bounds.Contains(e.Location))
+                {
+                    contextMenuStripAcceptDeny.Show(Cursor.Position);
+                }
+            }
+        }
+        private async void contextMenuStripAcceptDeny_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            var focusedItem = lvCipherRequestList.FocusedItem;
+            var sendUserId = focusedItem.SubItems[0].Text;
+            var createDate = focusedItem.SubItems[1].Text;
+            var cipherSendId = focusedItem.SubItems[2].Text;
+            var cipherSendIdInt = 0;
+            Int32.TryParse(cipherSendId, out cipherSendIdInt);
+
+            var acceptDenyChoice = e.ClickedItem.Text;
+
+            var acceptDeny = new CipherAcceptDeny
+            {
+                UserId = _userId,
+                CipherSendRequestId = cipherSendIdInt,
+                AcceptDeny = acceptDenyChoice
+            };
+            var c = await QuantumHubProvider.AcceptDeny(acceptDeny);
+
+            return;
         }
     }
 }

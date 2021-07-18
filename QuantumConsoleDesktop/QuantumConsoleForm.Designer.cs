@@ -29,10 +29,8 @@ namespace DesktopProto2
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ListView lvCiphers;
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(QuantumConsoleForm));
-            this.colCreated = new System.Windows.Forms.ColumnHeader();
-            this.colSerialNumber = new System.Windows.Forms.ColumnHeader();
             this.txtCipherSerialNo = new System.Windows.Forms.TextBox();
             this.txtOutputWindow = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -70,32 +68,20 @@ namespace DesktopProto2
             this.label11 = new System.Windows.Forms.Label();
             this.btnUploadCipher = new System.Windows.Forms.Button();
             this.btnRefreshCipherList = new System.Windows.Forms.Button();
-            lvCiphers = new System.Windows.Forms.ListView();
+            this.lvCipherList = new System.Windows.Forms.ListView();
+            this.colCreated = new System.Windows.Forms.ColumnHeader();
+            this.colSerialNumber = new System.Windows.Forms.ColumnHeader();
+            this.lvCipherRequestList = new System.Windows.Forms.ListView();
+            this.colRequestFrom = new System.Windows.Forms.ColumnHeader();
+            this.colRequestDateTIme = new System.Windows.Forms.ColumnHeader();
+            this.colRequestCipherLen = new System.Windows.Forms.ColumnHeader();
+            this.label12 = new System.Windows.Forms.Label();
+            this.btnRefreshCipherRequests = new System.Windows.Forms.Button();
+            this.contextMenuStripAcceptDeny = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.acceptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.denyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStripAcceptDeny.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lvCiphers
-            // 
-            lvCiphers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colCreated,
-            this.colSerialNumber});
-            lvCiphers.FullRowSelect = true;
-            lvCiphers.GridLines = true;
-            lvCiphers.HideSelection = false;
-            lvCiphers.Location = new System.Drawing.Point(945, 93);
-            lvCiphers.Name = "lvCiphers";
-            lvCiphers.Size = new System.Drawing.Size(278, 245);
-            lvCiphers.TabIndex = 38;
-            lvCiphers.UseCompatibleStateImageBehavior = false;
-            lvCiphers.View = System.Windows.Forms.View.Details;
-            // 
-            // colCreated
-            // 
-            this.colCreated.Text = "Created";
-            // 
-            // colSerialNumber
-            // 
-            this.colSerialNumber.Text = "Serial Number";
-            this.colSerialNumber.Width = 320;
             // 
             // txtCipherSerialNo
             // 
@@ -111,7 +97,7 @@ namespace DesktopProto2
             this.txtOutputWindow.Multiline = true;
             this.txtOutputWindow.Name = "txtOutputWindow";
             this.txtOutputWindow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtOutputWindow.Size = new System.Drawing.Size(630, 466);
+            this.txtOutputWindow.Size = new System.Drawing.Size(585, 466);
             this.txtOutputWindow.TabIndex = 2;
             this.txtOutputWindow.Enter += new System.EventHandler(this.txtCipherEncryptStartLocation_Enter);
             // 
@@ -326,7 +312,7 @@ namespace DesktopProto2
             // 
             this.progressBarECDC.Location = new System.Drawing.Point(309, 559);
             this.progressBarECDC.Name = "progressBarECDC";
-            this.progressBarECDC.Size = new System.Drawing.Size(630, 10);
+            this.progressBarECDC.Size = new System.Drawing.Size(585, 10);
             this.progressBarECDC.TabIndex = 29;
             // 
             // btnOpenFileToEncrypt
@@ -379,7 +365,7 @@ namespace DesktopProto2
             // 
             // btnLoadSelectedCipher
             // 
-            this.btnLoadSelectedCipher.Location = new System.Drawing.Point(945, 344);
+            this.btnLoadSelectedCipher.Location = new System.Drawing.Point(900, 279);
             this.btnLoadSelectedCipher.Name = "btnLoadSelectedCipher";
             this.btnLoadSelectedCipher.Size = new System.Drawing.Size(136, 34);
             this.btnLoadSelectedCipher.TabIndex = 36;
@@ -390,7 +376,7 @@ namespace DesktopProto2
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(983, 75);
+            this.label11.Location = new System.Drawing.Point(900, 75);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(160, 15);
             this.label11.TabIndex = 37;
@@ -408,7 +394,7 @@ namespace DesktopProto2
             // 
             // btnRefreshCipherList
             // 
-            this.btnRefreshCipherList.Location = new System.Drawing.Point(1087, 344);
+            this.btnRefreshCipherList.Location = new System.Drawing.Point(1042, 279);
             this.btnRefreshCipherList.Name = "btnRefreshCipherList";
             this.btnRefreshCipherList.Size = new System.Drawing.Size(136, 34);
             this.btnRefreshCipherList.TabIndex = 40;
@@ -416,14 +402,116 @@ namespace DesktopProto2
             this.btnRefreshCipherList.UseVisualStyleBackColor = true;
             this.btnRefreshCipherList.Click += new System.EventHandler(this.btnRefreshCipherList_Click);
             // 
+            // lvCipherList
+            // 
+            this.lvCipherList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colCreated,
+            this.colSerialNumber});
+            this.lvCipherList.FullRowSelect = true;
+            this.lvCipherList.GridLines = true;
+            this.lvCipherList.HideSelection = false;
+            this.lvCipherList.Location = new System.Drawing.Point(900, 92);
+            this.lvCipherList.MultiSelect = false;
+            this.lvCipherList.Name = "lvCipherList";
+            this.lvCipherList.Size = new System.Drawing.Size(370, 180);
+            this.lvCipherList.TabIndex = 41;
+            this.lvCipherList.UseCompatibleStateImageBehavior = false;
+            this.lvCipherList.View = System.Windows.Forms.View.Details;
+            // 
+            // colCreated
+            // 
+            this.colCreated.Text = "Created";
+            this.colCreated.Width = 120;
+            // 
+            // colSerialNumber
+            // 
+            this.colSerialNumber.Text = "Serial Number";
+            this.colSerialNumber.Width = 470;
+            // 
+            // lvCipherRequestList
+            // 
+            this.lvCipherRequestList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colRequestFrom,
+            this.colRequestDateTIme,
+            this.colRequestCipherLen});
+            this.lvCipherRequestList.FullRowSelect = true;
+            this.lvCipherRequestList.GridLines = true;
+            this.lvCipherRequestList.HideSelection = false;
+            this.lvCipherRequestList.Location = new System.Drawing.Point(900, 338);
+            this.lvCipherRequestList.MultiSelect = false;
+            this.lvCipherRequestList.Name = "lvCipherRequestList";
+            this.lvCipherRequestList.Size = new System.Drawing.Size(370, 180);
+            this.lvCipherRequestList.TabIndex = 42;
+            this.lvCipherRequestList.UseCompatibleStateImageBehavior = false;
+            this.lvCipherRequestList.View = System.Windows.Forms.View.Details;
+            this.lvCipherRequestList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvCipherRequestList_Click);
+            // 
+            // colRequestFrom
+            // 
+            this.colRequestFrom.Text = "From";
+            this.colRequestFrom.Width = 150;
+            // 
+            // colRequestDateTIme
+            // 
+            this.colRequestDateTIme.Text = "Sent";
+            this.colRequestDateTIme.Width = 130;
+            // 
+            // colRequestCipherLen
+            // 
+            this.colRequestCipherLen.Text = "Cipher Length";
+            this.colRequestCipherLen.Width = 100;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(900, 320);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(146, 15);
+            this.label12.TabIndex = 43;
+            this.label12.Text = "Incoming Cipher Requests";
+            // 
+            // btnRefreshCipherRequests
+            // 
+            this.btnRefreshCipherRequests.Location = new System.Drawing.Point(900, 524);
+            this.btnRefreshCipherRequests.Name = "btnRefreshCipherRequests";
+            this.btnRefreshCipherRequests.Size = new System.Drawing.Size(160, 34);
+            this.btnRefreshCipherRequests.TabIndex = 44;
+            this.btnRefreshCipherRequests.Text = "Refresh Cipher Requests";
+            this.btnRefreshCipherRequests.UseVisualStyleBackColor = true;
+            this.btnRefreshCipherRequests.Click += new System.EventHandler(this.btnRefreshCipherRequests_Click);
+            // 
+            // contextMenuStripAcceptDeny
+            // 
+            this.contextMenuStripAcceptDeny.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.acceptToolStripMenuItem,
+            this.denyToolStripMenuItem});
+            this.contextMenuStripAcceptDeny.Name = "contextMenuStrip1";
+            this.contextMenuStripAcceptDeny.Size = new System.Drawing.Size(112, 48);
+            this.contextMenuStripAcceptDeny.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStripAcceptDeny_ItemClicked);
+            // 
+            // acceptToolStripMenuItem
+            // 
+            this.acceptToolStripMenuItem.Name = "acceptToolStripMenuItem";
+            this.acceptToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.acceptToolStripMenuItem.Text = "Accept";
+            // 
+            // denyToolStripMenuItem
+            // 
+            this.denyToolStripMenuItem.Name = "denyToolStripMenuItem";
+            this.denyToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.denyToolStripMenuItem.Text = "Deny";
+            // 
             // QuantumConsoleForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1282, 594);
+            this.Controls.Add(this.btnRefreshCipherRequests);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.lvCipherRequestList);
+            this.Controls.Add(this.lvCipherList);
             this.Controls.Add(this.btnRefreshCipherList);
             this.Controls.Add(this.btnUploadCipher);
-            this.Controls.Add(lvCiphers);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnLoadSelectedCipher);
             this.Controls.Add(this.btnTestAPI);
@@ -458,6 +546,7 @@ namespace DesktopProto2
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "QuantumConsoleForm";
             this.Text = "QuantumLock Encrypt";
+            this.contextMenuStripAcceptDeny.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -499,11 +588,20 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnTestAPI;
         private System.Windows.Forms.Button btnLoadSelectedCipher;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.ListView lvCiphers;
-        private System.Windows.Forms.ColumnHeader colCreated;
-        private System.Windows.Forms.ColumnHeader colSerialNumber;
         private System.Windows.Forms.Button btnUploadCipher;
         private System.Windows.Forms.Button btnRefreshCipherList;
+        private System.Windows.Forms.ListView lvCipherList;
+        private System.Windows.Forms.ColumnHeader colCreated;
+        private System.Windows.Forms.ColumnHeader colSerialNumber;
+        private System.Windows.Forms.ListView lvCipherRequestList;
+        private System.Windows.Forms.ColumnHeader colRequestFrom;
+        private System.Windows.Forms.ColumnHeader colRequestDateTIme;
+        private System.Windows.Forms.ColumnHeader colRequestCipherLen;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Button btnRefreshCipherRequests;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripAcceptDeny;
+        private System.Windows.Forms.ToolStripMenuItem acceptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem denyToolStripMenuItem;
     }
 }
 
