@@ -13,6 +13,7 @@ using System.Windows.Forms;
 
 using QuantumEncryptLib;
 using QuantumEncryptPoCDesktop;
+using QuantumConsoleDesktop;
 using QuantumConsoleDesktop.Models;
 using QuantumConsoleDesktop.Providers;
 
@@ -26,6 +27,7 @@ namespace DesktopProto2
         byte[] _unEncryptedBytes;
         string _cipher;
         string _serialNo;
+        Cipher _cipherObj;
         CipherList _cipherList = null;
         readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
@@ -217,8 +219,8 @@ namespace DesktopProto2
                 return;
             }
             //_cipher = GetRandomCipher(cipherLen);
-            var cipherObject = await QuantumHubProvider.GetNewCipher(1, cipherLen);
-            _cipher = cipherObject.cipherString;
+            _cipherObj = await QuantumHubProvider.GetNewCipher(1, cipherLen);
+            _cipher = _cipherObj.cipherString;
             SaveCipher();
             txtCipherFileSize.Text = _cipher.Length.ToString();
             txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
@@ -457,6 +459,7 @@ namespace DesktopProto2
             {
                 if (c.serialNumber == serialNumber)
                 {
+                    _cipherObj = c;
                     _cipher = c.cipherString;
                     _serialNo = c.serialNumber;
                     txtCipherFileName.Text = string.Empty;
@@ -477,7 +480,7 @@ namespace DesktopProto2
             var sendList = await QuantumHubProvider.GetNotifications(_userId);
             if (sendList.SendRequests.Count == 0)
             {
-                MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -523,6 +526,27 @@ namespace DesktopProto2
             var c = await QuantumHubProvider.AcceptDeny(acceptDeny);
 
             return;
+        }
+
+        private async void btnSendCipher_Click(object sender, EventArgs e)
+        {
+            if (_cipherObj == null || _cipherObj.cipherId < 1)
+            {
+                MessageBox.Show($"Cipher cannot be uploaded. There is no cipher loaded. Please load a cipher before sending.\n\nNote: Ciphers loaded from a file cannot be uploaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            var dialog = new SendCipherDialog();
+            dialog.ShowDialog();
+
+
+            var cipherSend = new CipherSend
+            {
+                CipherId = _cipherObj.cipherId,
+                SenderUserId = _userId,
+                RecipientUserId = 3,
+                StartingPoint = _cipherObj.startingPoint
+            };
+            await QuantumHubProvider.SendCipher(cipherSend);
         }
     }
 }

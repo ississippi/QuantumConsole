@@ -63,7 +63,6 @@ namespace DesktopProto2
             this.btnOpenCipherFile = new System.Windows.Forms.Button();
             this.txtCipherEncryptStartLocation = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.btnTestAPI = new System.Windows.Forms.Button();
             this.btnLoadSelectedCipher = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.btnUploadCipher = new System.Windows.Forms.Button();
@@ -80,12 +79,15 @@ namespace DesktopProto2
             this.contextMenuStripAcceptDeny = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.acceptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.denyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnSendCipher = new System.Windows.Forms.Button();
+            this.cbLoginUsername = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
             this.contextMenuStripAcceptDeny.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtCipherSerialNo
             // 
-            this.txtCipherSerialNo.Location = new System.Drawing.Point(67, 286);
+            this.txtCipherSerialNo.Location = new System.Drawing.Point(67, 332);
             this.txtCipherSerialNo.Name = "txtCipherSerialNo";
             this.txtCipherSerialNo.Size = new System.Drawing.Size(230, 23);
             this.txtCipherSerialNo.TabIndex = 1;
@@ -108,7 +110,7 @@ namespace DesktopProto2
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(67, 268);
+            this.label1.Location = new System.Drawing.Point(67, 314);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(162, 15);
             this.label1.TabIndex = 6;
@@ -117,7 +119,7 @@ namespace DesktopProto2
             // btnGetNewCipher
             // 
             this.btnGetNewCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnGetNewCipher.Location = new System.Drawing.Point(67, 75);
+            this.btnGetNewCipher.Location = new System.Drawing.Point(67, 128);
             this.btnGetNewCipher.Name = "btnGetNewCipher";
             this.btnGetNewCipher.Size = new System.Drawing.Size(230, 42);
             this.btnGetNewCipher.TabIndex = 7;
@@ -127,7 +129,7 @@ namespace DesktopProto2
             // 
             // maxEncryptFileSize
             // 
-            this.maxEncryptFileSize.Location = new System.Drawing.Point(67, 333);
+            this.maxEncryptFileSize.Location = new System.Drawing.Point(67, 379);
             this.maxEncryptFileSize.Name = "maxEncryptFileSize";
             this.maxEncryptFileSize.Size = new System.Drawing.Size(230, 23);
             this.maxEncryptFileSize.TabIndex = 8;
@@ -138,7 +140,7 @@ namespace DesktopProto2
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(67, 315);
+            this.label2.Location = new System.Drawing.Point(67, 361);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(219, 15);
             this.label2.TabIndex = 9;
@@ -146,7 +148,7 @@ namespace DesktopProto2
             // 
             // txtCipherFileName
             // 
-            this.txtCipherFileName.Location = new System.Drawing.Point(67, 192);
+            this.txtCipherFileName.Location = new System.Drawing.Point(67, 238);
             this.txtCipherFileName.Name = "txtCipherFileName";
             this.txtCipherFileName.Size = new System.Drawing.Size(199, 23);
             this.txtCipherFileName.TabIndex = 10;
@@ -155,7 +157,7 @@ namespace DesktopProto2
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(67, 174);
+            this.label3.Location = new System.Drawing.Point(67, 220);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 15);
             this.label3.TabIndex = 11;
@@ -163,7 +165,7 @@ namespace DesktopProto2
             // 
             // txtEncryptedFilename
             // 
-            this.txtEncryptedFilename.Location = new System.Drawing.Point(67, 145);
+            this.txtEncryptedFilename.Location = new System.Drawing.Point(67, 191);
             this.txtEncryptedFilename.Name = "txtEncryptedFilename";
             this.txtEncryptedFilename.Size = new System.Drawing.Size(199, 23);
             this.txtEncryptedFilename.TabIndex = 12;
@@ -172,7 +174,7 @@ namespace DesktopProto2
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(67, 127);
+            this.label4.Location = new System.Drawing.Point(67, 173);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(120, 15);
             this.label4.TabIndex = 13;
@@ -253,9 +255,9 @@ namespace DesktopProto2
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSave.Location = new System.Drawing.Point(67, 416);
+            this.btnSave.Location = new System.Drawing.Point(67, 468);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(230, 42);
+            this.btnSave.Size = new System.Drawing.Size(115, 42);
             this.btnSave.TabIndex = 24;
             this.btnSave.Text = "Save Encrypted File";
             this.btnSave.UseVisualStyleBackColor = true;
@@ -264,9 +266,9 @@ namespace DesktopProto2
             // btnDecrypt
             // 
             this.btnDecrypt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnDecrypt.Location = new System.Drawing.Point(188, 369);
+            this.btnDecrypt.Location = new System.Drawing.Point(188, 420);
             this.btnDecrypt.Name = "btnDecrypt";
-            this.btnDecrypt.Size = new System.Drawing.Size(109, 41);
+            this.btnDecrypt.Size = new System.Drawing.Size(115, 42);
             this.btnDecrypt.TabIndex = 25;
             this.btnDecrypt.Text = "Decrypt";
             this.btnDecrypt.UseVisualStyleBackColor = true;
@@ -275,9 +277,9 @@ namespace DesktopProto2
             // btnSaveCipher
             // 
             this.btnSaveCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnSaveCipher.Location = new System.Drawing.Point(67, 464);
+            this.btnSaveCipher.Location = new System.Drawing.Point(188, 468);
             this.btnSaveCipher.Name = "btnSaveCipher";
-            this.btnSaveCipher.Size = new System.Drawing.Size(230, 46);
+            this.btnSaveCipher.Size = new System.Drawing.Size(115, 42);
             this.btnSaveCipher.TabIndex = 26;
             this.btnSaveCipher.Text = "Save Cipher";
             this.btnSaveCipher.UseVisualStyleBackColor = true;
@@ -300,9 +302,9 @@ namespace DesktopProto2
             // btnEncrypt
             // 
             this.btnEncrypt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnEncrypt.Location = new System.Drawing.Point(67, 369);
+            this.btnEncrypt.Location = new System.Drawing.Point(67, 420);
             this.btnEncrypt.Name = "btnEncrypt";
-            this.btnEncrypt.Size = new System.Drawing.Size(115, 41);
+            this.btnEncrypt.Size = new System.Drawing.Size(115, 42);
             this.btnEncrypt.TabIndex = 28;
             this.btnEncrypt.Text = "Encrypt";
             this.btnEncrypt.UseVisualStyleBackColor = true;
@@ -318,7 +320,7 @@ namespace DesktopProto2
             // btnOpenFileToEncrypt
             // 
             this.btnOpenFileToEncrypt.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
-            this.btnOpenFileToEncrypt.Location = new System.Drawing.Point(272, 145);
+            this.btnOpenFileToEncrypt.Location = new System.Drawing.Point(272, 191);
             this.btnOpenFileToEncrypt.Name = "btnOpenFileToEncrypt";
             this.btnOpenFileToEncrypt.Size = new System.Drawing.Size(25, 23);
             this.btnOpenFileToEncrypt.TabIndex = 30;
@@ -328,7 +330,7 @@ namespace DesktopProto2
             // btnOpenCipherFile
             // 
             this.btnOpenCipherFile.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
-            this.btnOpenCipherFile.Location = new System.Drawing.Point(272, 191);
+            this.btnOpenCipherFile.Location = new System.Drawing.Point(272, 237);
             this.btnOpenCipherFile.Name = "btnOpenCipherFile";
             this.btnOpenCipherFile.Size = new System.Drawing.Size(25, 23);
             this.btnOpenCipherFile.TabIndex = 31;
@@ -337,7 +339,7 @@ namespace DesktopProto2
             // 
             // txtCipherEncryptStartLocation
             // 
-            this.txtCipherEncryptStartLocation.Location = new System.Drawing.Point(67, 239);
+            this.txtCipherEncryptStartLocation.Location = new System.Drawing.Point(67, 285);
             this.txtCipherEncryptStartLocation.Name = "txtCipherEncryptStartLocation";
             this.txtCipherEncryptStartLocation.Size = new System.Drawing.Size(230, 23);
             this.txtCipherEncryptStartLocation.TabIndex = 32;
@@ -347,21 +349,11 @@ namespace DesktopProto2
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(67, 221);
+            this.label10.Location = new System.Drawing.Point(67, 267);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(228, 15);
             this.label10.TabIndex = 33;
             this.label10.Text = "Cipher Start Location After Reserved Bytes";
-            // 
-            // btnTestAPI
-            // 
-            this.btnTestAPI.Location = new System.Drawing.Point(67, 12);
-            this.btnTestAPI.Name = "btnTestAPI";
-            this.btnTestAPI.Size = new System.Drawing.Size(199, 23);
-            this.btnTestAPI.TabIndex = 34;
-            this.btnTestAPI.Text = "TestAPI";
-            this.btnTestAPI.UseVisualStyleBackColor = true;
-            this.btnTestAPI.Click += new System.EventHandler(this.btnTestAPI_Click);
             // 
             // btnLoadSelectedCipher
             // 
@@ -385,9 +377,9 @@ namespace DesktopProto2
             // btnUploadCipher
             // 
             this.btnUploadCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnUploadCipher.Location = new System.Drawing.Point(67, 516);
+            this.btnUploadCipher.Location = new System.Drawing.Point(188, 516);
             this.btnUploadCipher.Name = "btnUploadCipher";
-            this.btnUploadCipher.Size = new System.Drawing.Size(230, 42);
+            this.btnUploadCipher.Size = new System.Drawing.Size(115, 42);
             this.btnUploadCipher.TabIndex = 39;
             this.btnUploadCipher.Text = "Upload Loaded Cipher to Hub";
             this.btnUploadCipher.UseVisualStyleBackColor = true;
@@ -501,11 +493,42 @@ namespace DesktopProto2
             this.denyToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
             this.denyToolStripMenuItem.Text = "Deny";
             // 
+            // btnSendCipher
+            // 
+            this.btnSendCipher.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnSendCipher.Location = new System.Drawing.Point(67, 516);
+            this.btnSendCipher.Name = "btnSendCipher";
+            this.btnSendCipher.Size = new System.Drawing.Size(115, 42);
+            this.btnSendCipher.TabIndex = 45;
+            this.btnSendCipher.Text = "Send Cipher";
+            this.btnSendCipher.UseVisualStyleBackColor = true;
+            this.btnSendCipher.Click += new System.EventHandler(this.btnSendCipher_Click);
+            // 
+            // cbLoginUsername
+            // 
+            this.cbLoginUsername.FormattingEnabled = true;
+            this.cbLoginUsername.Location = new System.Drawing.Point(67, 99);
+            this.cbLoginUsername.Name = "cbLoginUsername";
+            this.cbLoginUsername.Size = new System.Drawing.Size(228, 23);
+            this.cbLoginUsername.TabIndex = 46;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(67, 81);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(60, 15);
+            this.label13.TabIndex = 48;
+            this.label13.Text = "Username";
+            // 
             // QuantumConsoleForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1282, 594);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.cbLoginUsername);
+            this.Controls.Add(this.btnSendCipher);
             this.Controls.Add(this.btnRefreshCipherRequests);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.lvCipherRequestList);
@@ -514,7 +537,6 @@ namespace DesktopProto2
             this.Controls.Add(this.btnUploadCipher);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnLoadSelectedCipher);
-            this.Controls.Add(this.btnTestAPI);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.txtCipherEncryptStartLocation);
             this.Controls.Add(this.btnOpenCipherFile);
@@ -585,7 +607,6 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnOpenCipherFile;
         private System.Windows.Forms.TextBox txtCipherEncryptStartLocation;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button btnTestAPI;
         private System.Windows.Forms.Button btnLoadSelectedCipher;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button btnUploadCipher;
@@ -602,6 +623,9 @@ namespace DesktopProto2
         private System.Windows.Forms.ContextMenuStrip contextMenuStripAcceptDeny;
         private System.Windows.Forms.ToolStripMenuItem acceptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem denyToolStripMenuItem;
+        private System.Windows.Forms.Button btnSendCipher;
+        private System.Windows.Forms.ComboBox cbLoginUsername;
+        private System.Windows.Forms.Label label13;
     }
 }
 
