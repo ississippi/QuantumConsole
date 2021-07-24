@@ -27,7 +27,7 @@ namespace QuantumConsoleDesktop.Providers
                         new MediaTypeWithQualityHeaderValue("plain/text"));
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
 
-                    healthString = await httpClient.GetStringAsync("https://localhost:44342/api/Cipher");
+                    healthString = await httpClient.GetStringAsync(GetQuantumHubBaseAddress() + "/api/Cipher");
                 }
             }
             catch (Exception e)
@@ -50,7 +50,7 @@ namespace QuantumConsoleDesktop.Providers
                 var h = await HealthCheck();
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -82,7 +82,7 @@ namespace QuantumConsoleDesktop.Providers
                 var h = await HealthCheck();
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -116,7 +116,7 @@ namespace QuantumConsoleDesktop.Providers
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -149,7 +149,7 @@ namespace QuantumConsoleDesktop.Providers
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -182,7 +182,7 @@ namespace QuantumConsoleDesktop.Providers
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -212,7 +212,7 @@ namespace QuantumConsoleDesktop.Providers
             {
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    httpClient.BaseAddress = new Uri("https://localhost:44342");
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
                     httpClient.DefaultRequestHeaders.Accept.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
@@ -233,6 +233,11 @@ namespace QuantumConsoleDesktop.Providers
             }
 
             return list;
+        }
+
+        public static string GetQuantumHubBaseAddress()
+        {
+            return "https://quantumhub.azurewebsites.net";
         }
     }
 }

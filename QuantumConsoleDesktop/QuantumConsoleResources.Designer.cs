@@ -61,7 +61,7 @@ namespace QuantumConsoleDesktop {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://localhost:44342/api/cipher/getnewcipher.
+        ///   Looks up a localized string similar to https://quantumhub.azurewebsites.net/api/cipher/getnewcipher.
         /// </summary>
         internal static string urlGetNewCipher {
             get {
@@ -70,7 +70,7 @@ namespace QuantumConsoleDesktop {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://localhost:44342/api/Cipher.
+        ///   Looks up a localized string similar to https://quantumhub.azurewebsites.net/api/Cipher.
         /// </summary>
         internal static string urlHealthCheck {
             get {

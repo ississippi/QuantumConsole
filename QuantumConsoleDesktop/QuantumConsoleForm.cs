@@ -478,7 +478,7 @@ namespace DesktopProto2
         private async void btnRefreshCipherRequests_Click(object sender, EventArgs e)
         {
             var sendList = await QuantumHubProvider.GetNotifications(_userId);
-            if (sendList.SendRequests.Count == 0)
+            if (sendList == null || sendList.SendRequests == null || sendList.SendRequests.Count == 0)
             {
                 MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
