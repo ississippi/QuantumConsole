@@ -80,8 +80,8 @@ namespace DesktopProto2
             this.acceptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.denyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnSendCipher = new System.Windows.Forms.Button();
-            this.cbLoginUsername = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.cbLoginUsername = new System.Windows.Forms.ComboBox();
             this.contextMenuStripAcceptDeny.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -504,14 +504,6 @@ namespace DesktopProto2
             this.btnSendCipher.UseVisualStyleBackColor = true;
             this.btnSendCipher.Click += new System.EventHandler(this.btnSendCipher_Click);
             // 
-            // cbLoginUsername
-            // 
-            this.cbLoginUsername.FormattingEnabled = true;
-            this.cbLoginUsername.Location = new System.Drawing.Point(67, 99);
-            this.cbLoginUsername.Name = "cbLoginUsername";
-            this.cbLoginUsername.Size = new System.Drawing.Size(228, 23);
-            this.cbLoginUsername.TabIndex = 46;
-            // 
             // label13
             // 
             this.label13.AutoSize = true;
@@ -520,6 +512,26 @@ namespace DesktopProto2
             this.label13.Size = new System.Drawing.Size(60, 15);
             this.label13.TabIndex = 48;
             this.label13.Text = "Username";
+            // 
+            // cbLoginUsername
+            // 
+            this.cbLoginUsername.FormattingEnabled = true;
+            this.cbLoginUsername.Items.AddRange(new object[] {
+            "Archer Conrad",
+            "Arvel Alma",
+            "Lavinia Esther",
+            "Milburn Carla",
+            "Kleopatros Lydos",
+            "Terence Garey",
+            "Pamillia Rilla",
+            "Marcianus Delia",
+            "Hermolaos Lance",
+            "Valerius Zenais"});
+            this.cbLoginUsername.Location = new System.Drawing.Point(67, 99);
+            this.cbLoginUsername.Name = "cbLoginUsername";
+            this.cbLoginUsername.Size = new System.Drawing.Size(228, 23);
+            this.cbLoginUsername.TabIndex = 46;
+            this.cbLoginUsername.SelectionChangeCommitted += new System.EventHandler(this.cbLoginUsername_SelectionChangeCommitted);
             // 
             // QuantumConsoleForm
             // 
@@ -624,8 +636,8 @@ namespace DesktopProto2
         private System.Windows.Forms.ToolStripMenuItem acceptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem denyToolStripMenuItem;
         private System.Windows.Forms.Button btnSendCipher;
-        private System.Windows.Forms.ComboBox cbLoginUsername;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.ComboBox cbLoginUsername;
     }
 }
 

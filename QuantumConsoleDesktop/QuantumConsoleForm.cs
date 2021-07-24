@@ -21,7 +21,7 @@ namespace DesktopProto2
 {
     public partial class QuantumConsoleForm : Form
     {
-        int _userId = 1;
+        int _selectedUserId = 0;
         const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
         byte[] _unEncryptedBytes;
@@ -31,6 +31,7 @@ namespace DesktopProto2
         CipherList _cipherList = null;
         readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
+        Dictionary<string, int> _userList;
         public QuantumConsoleForm()
         {
             InitializeComponent();
@@ -52,6 +53,18 @@ namespace DesktopProto2
 
             txtCipherEncryptStartLocation.Enabled = true;
             txtCipherEncryptStartLocation.Text = "0";
+
+            _userList = new Dictionary<string, int>();
+            _userList.Add("Archer Conrad", 1);
+            _userList.Add("Arvel Alma", 2);
+            _userList.Add("Lavinia Esther", 3);
+            _userList.Add("Milburn Carla", 4);
+            _userList.Add("Kleopatros Lydos", 5);
+            _userList.Add("Terence Garey", 6);
+            _userList.Add("Pamillia Rilla", 7);
+            _userList.Add("Marcianus Delia", 8);
+            _userList.Add("Hermolaos Lance", 9);
+            _userList.Add("Valerius Zenais", 10);
         }
 
         private void SetText(string text)
@@ -477,7 +490,7 @@ namespace DesktopProto2
 
         private async void btnRefreshCipherRequests_Click(object sender, EventArgs e)
         {
-            var sendList = await QuantumHubProvider.GetNotifications(_userId);
+            var sendList = await QuantumHubProvider.GetNotifications(_selectedUserId);
             if (sendList == null || sendList.SendRequests == null || sendList.SendRequests.Count == 0)
             {
                 MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -519,7 +532,7 @@ namespace DesktopProto2
 
             var acceptDeny = new CipherAcceptDeny
             {
-                UserId = _userId,
+                UserId = _selectedUserId,
                 CipherSendRequestId = cipherSendIdInt,
                 AcceptDeny = acceptDenyChoice
             };
@@ -542,11 +555,16 @@ namespace DesktopProto2
             var cipherSend = new CipherSend
             {
                 CipherId = _cipherObj.cipherId,
-                SenderUserId = _userId,
+                SenderUserId = _selectedUserId,
                 RecipientUserId = 3,
                 StartingPoint = _cipherObj.startingPoint
             };
             await QuantumHubProvider.SendCipher(cipherSend);
+        }
+
+        private void cbLoginUsername_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            _userList.TryGetValue(cbLoginUsername.SelectedItem.ToString(), out _selectedUserId);
         }
     }
 }
