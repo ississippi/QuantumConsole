@@ -205,11 +205,16 @@ namespace QuantumConsoleDesktop.Providers
             return cipher;
         }
 
-        public async static Task<CipherSendList> GetNotifications(int userId)
+        public async static Task<CipherSendList> GetNotifications(int recipientId, string status)
         {
             CipherSendList list = null;
             try
             {
+                var req = new NotificationRequest()
+                {
+                    RecipientId = recipientId,
+                    Status = status
+                };
                 using (HttpClient httpClient = new HttpClient())
                 {
                     httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
@@ -217,7 +222,7 @@ namespace QuantumConsoleDesktop.Providers
                     httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
                     httpClient.DefaultRequestHeaders.Accept.Add(
                         new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(userId));
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(req));
                     httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
                     string getNotificationsPath = "/api/Notifications/GetNotifications";
@@ -237,7 +242,11 @@ namespace QuantumConsoleDesktop.Providers
 
         public static string GetQuantumHubBaseAddress()
         {
+//#if DEBUG
+//            return "https://localhost:44342/";
+//#else
             return "https://quantumhub.azurewebsites.net";
+//#endif
         }
     }
 }

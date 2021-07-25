@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace QuantumConsoleDesktop.Models
 {
@@ -19,5 +20,12 @@ namespace QuantumConsoleDesktop.Models
     {
         public List<Notification> Notifications { get; set; }
         public int Status { get; set; }
+    }
+    public class NotificationRequest
+    {
+        [JsonProperty("recipientId")]
+        public int RecipientId { get; set; }
+        [JsonProperty("status")]
+        public string Status { get; set; }
     }
 }

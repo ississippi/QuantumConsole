@@ -25,8 +25,6 @@ namespace DesktopProto2
         const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
         byte[] _unEncryptedBytes;
-        string _cipher;
-        string _serialNo;
         Cipher _cipherObj;
         CipherList _cipherList = null;
         readonly string _cipherVersion = "10";
@@ -82,7 +80,7 @@ namespace DesktopProto2
                     MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (string.IsNullOrEmpty(_cipher))
+                if (_cipherObj == null || string.IsNullOrEmpty(_cipherObj.cipherString))
                 {
                     txtCipherFileName.BackColor = Color.Red;
                     btnLoadSelectedCipher.BackColor = Color.Red;
@@ -113,7 +111,7 @@ namespace DesktopProto2
                 // About to Encrypt, start a timer
                 var reason = string.Empty;
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipher, cipherStartLocation, _serialNo, progress, ref reason));
+                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipherObj.cipherString, cipherStartLocation, _cipherObj.serialNumber, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -142,6 +140,11 @@ namespace DesktopProto2
         {
             try
             {
+                if (_cipherObj == null)
+                {
+                    MessageBox.Show($"No cipher is loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 if (_encryptedBytes == null)
                 {
                     MessageBox.Show($"File to decrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -155,7 +158,7 @@ namespace DesktopProto2
                 });
 
                 var cipherStartLocation = QuantumEncrypt.GetCipherStartLocation(_encryptedBytes);
-                if (cipherStartLocation < 0 || cipherStartLocation > _cipher.Length)
+                if (cipherStartLocation < 0 || cipherStartLocation > _cipherObj.cipherString.Length)
                 {
                     MessageBox.Show($"Cipher Start Location from the encrypted file is not valid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -164,7 +167,7 @@ namespace DesktopProto2
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 var cipherSerial = string.Empty;
                 var encryptedSerial = string.Empty;
-                if (!QuantumEncrypt.IsSerialNoMatchForDecryption(_encryptedBytes, _cipher, ref cipherSerial, ref encryptedSerial))
+                if (!QuantumEncrypt.IsSerialNoMatchForDecryption(_encryptedBytes, _cipherObj.cipherString, ref cipherSerial, ref encryptedSerial))
                 {
                     MessageBox.Show($"Serial Numbers do not match. " +
                         $"\nCipher: {cipherSerial} " +
@@ -175,7 +178,7 @@ namespace DesktopProto2
                 txtCipherEncryptStartLocation.Enabled = true;
                 byte[] decryptedBytes = null;
                 var reason = string.Empty;
-                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipher, cipherStartLocation, progress, ref reason));
+                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipherObj.cipherString, cipherStartLocation, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -204,8 +207,8 @@ namespace DesktopProto2
         private void UpdateFormFields()
         {
             txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
-            txtCipherSerialNo.Text = _serialNo;
-            txtCipherFileSize.Text = _cipher.Length.ToString();
+            txtCipherSerialNo.Text = (_cipherObj != null) ? _cipherObj.serialNumber : string.Empty;
+            txtCipherFileSize.Text = (_cipherObj != null) ? _cipherObj.cipherString.Length.ToString() : "0";
             txtInputFileSize.Text = (_unEncryptedBytes == null) ? string.Empty : _unEncryptedBytes.Length.ToString();
             txtEncryptedFileSize.Text = (_encryptedBytes == null) ? string.Empty : _encryptedBytes.Length.ToString();
         }
@@ -233,13 +236,12 @@ namespace DesktopProto2
             }
             //_cipher = GetRandomCipher(cipherLen);
             _cipherObj = await QuantumHubProvider.GetNewCipher(1, cipherLen);
-            _cipher = _cipherObj.cipherString;
             SaveCipher();
-            txtCipherFileSize.Text = _cipher.Length.ToString();
-            txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
-            var cipherArr = new byte[_cipher.Length];
+            txtCipherFileSize.Text = _cipherObj.cipherString.Length.ToString();
+            txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipherObj.cipherString);
+            var cipherArr = new byte[_cipherObj.cipherString.Length];
             var idx = 0;
-            QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherArr, ref idx);
+            QuantumEncrypt.CopyStringToByteArray(_cipherObj.cipherString, ref cipherArr, ref idx);
             txtOutputWindow.Text = QuantumEncrypt.HexDump(cipherArr);
         }
         //private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
@@ -371,31 +373,33 @@ namespace DesktopProto2
             {
                 var arr = File.ReadAllBytes(openCipherDialog.FileName);
                 //btnSave.Enabled = false;
-                _cipher = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
-                _serialNo = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
+                if (_cipherObj == null)
+                    _cipherObj = new Cipher();
+                _cipherObj.cipherString = QuantumEncrypt.CopyBytesToString(arr, 0, arr.Length);
+                _cipherObj.serialNumber = QuantumEncrypt.GetSerialNumberFromCipher(_cipherObj.cipherString);
+                txtCipherSerialNo.Text = _cipherObj.serialNumber;
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
-                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
-                txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipher);
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
             }
         }
 
         private async void SaveCipher()
         {
-            if (string.IsNullOrEmpty(_cipher))
+            if (_cipherObj == null || string.IsNullOrEmpty(_cipherObj.cipherString))
             {
                 MessageBox.Show($"Cipher is not loaded.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             if (saveCipherDialog.ShowDialog() == DialogResult.OK)
             {
-                var cipherBytes = new byte[_cipher.Length];
+                var cipherBytes = new byte[_cipherObj.cipherString.Length];
                 var idx = 0;
-                QuantumEncrypt.CopyStringToByteArray(_cipher, ref cipherBytes, ref idx);
+                QuantumEncrypt.CopyStringToByteArray(_cipherObj.cipherString, ref cipherBytes, ref idx);
                 if (saveCipherDialog.FileName != "")
                 {
                     // default extension for saved encrypted files to be .qlock
                     FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
-                    fs.Write(cipherBytes, 0, _cipher.Length);
+                    fs.Write(cipherBytes, 0, _cipherObj.cipherString.Length);
                     fs.Flush();
                     fs.Close();
                 }
@@ -446,7 +450,8 @@ namespace DesktopProto2
             }
             var it = lvCipherList.SelectedItems;
             var createdDTStr = it[0].SubItems[0].Text;
-            var serialNo = it[0].SubItems[1].Text;
+            var maxEncryptionLength = it[0].SubItems[1].Text;
+            var serialNo = it[0].SubItems[2].Text;
 
             await LoadCipherFromCipherList(_cipherList, serialNo);
 
@@ -455,12 +460,30 @@ namespace DesktopProto2
 
         private async void btnRefreshCipherList_Click(object sender, EventArgs e)
         {
-            _cipherList = await QuantumHubProvider.GetCipherList(1);
+            await RefreshCipherList();
+        }
+
+        private async Task RefreshCipherList(bool supressNoRequests = false)
+        {
+            if (_selectedUserId == 0)
+            {
+                cbLoginUsername.BackColor = Color.Red;
+                MessageBox.Show($"Please select a user.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            _cipherList = await QuantumHubProvider.GetCipherList(_selectedUserId);
             lvCipherList.Items.Clear();
+            if (_cipherList == null || _cipherList.Ciphers.Count == 0)
+            {
+                if (!supressNoRequests)
+                    MessageBox.Show($"The current user has no ciphers.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
             var it = 0;
             foreach (Cipher c in _cipherList.Ciphers)
             {
                 lvCipherList.Items.Add(c.createdDateTime.ToString());
+                lvCipherList.Items[it].SubItems.Add(c.maxEncryptionLength.ToString());
                 lvCipherList.Items[it].SubItems.Add(c.serialNumber);
                 it++;
             }
@@ -473,13 +496,11 @@ namespace DesktopProto2
                 if (c.serialNumber == serialNumber)
                 {
                     _cipherObj = c;
-                    _cipher = c.cipherString;
-                    _serialNo = c.serialNumber;
                     txtCipherFileName.Text = string.Empty;
                     txtCipherSerialNo.Text = c.serialNumber;
-                    maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipher).ToString();
+                    maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
                     var hexDump = string.Empty;
-                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipher));
+                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipherObj.cipherString));
                     txtOutputWindow.Text = hexDump; 
                     
                     return;
@@ -490,19 +511,32 @@ namespace DesktopProto2
 
         private async void btnRefreshCipherRequests_Click(object sender, EventArgs e)
         {
-            var sendList = await QuantumHubProvider.GetNotifications(_selectedUserId);
+            await RefreshCipherRequests();
+        }
+
+        private async Task RefreshCipherRequests(bool supressNoRequests = false)
+        {
+            lvCipherRequestList.Items.Clear();
+            if (_selectedUserId == 0)
+            {
+                cbLoginUsername.BackColor = Color.Red;
+                MessageBox.Show($"Please select a user.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var sendList = await QuantumHubProvider.GetNotifications(_selectedUserId, "pending");
             if (sendList == null || sendList.SendRequests == null || sendList.SendRequests.Count == 0)
             {
-                MessageBox.Show($"There are no pending requests.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!supressNoRequests)
+                    MessageBox.Show($"There are no pending requests.\n\n", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            lvCipherRequestList.Items.Clear();
             var it = 0;
             foreach (CipherSend s in sendList.SendRequests)
             {
-                lvCipherRequestList.Items.Add(s.SenderUserId.ToString());
+                lvCipherRequestList.Items.Add(GetUserNameFromId(s.SenderUserId));
                 lvCipherRequestList.Items[it].SubItems.Add(s.CreateDate.ToString());
+                lvCipherRequestList.Items[it].SubItems.Add(s.MaxEncryptionLength.ToString());
                 lvCipherRequestList.Items[it].SubItems.Add(s.CipherSendId.ToString());
                 it++;
             }
@@ -524,7 +558,8 @@ namespace DesktopProto2
             var focusedItem = lvCipherRequestList.FocusedItem;
             var sendUserId = focusedItem.SubItems[0].Text;
             var createDate = focusedItem.SubItems[1].Text;
-            var cipherSendId = focusedItem.SubItems[2].Text;
+            var maxEncryptionLength = focusedItem.SubItems[2].Text;
+            var cipherSendId = focusedItem.SubItems[3].Text;
             var cipherSendIdInt = 0;
             Int32.TryParse(cipherSendId, out cipherSendIdInt);
 
@@ -537,6 +572,55 @@ namespace DesktopProto2
                 AcceptDeny = acceptDenyChoice
             };
             var c = await QuantumHubProvider.AcceptDeny(acceptDeny);
+            await RefreshCipherRequests(true);
+            await RefreshCipherList(true);
+
+            return;
+        }
+
+
+        private async void lvCipherList_Click(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var focusedItem = lvCipherList.FocusedItem;
+                if (focusedItem != null && focusedItem.Bounds.Contains(e.Location))
+                {
+                    contextMenuCipherList.Show(Cursor.Position);
+                }
+            }
+        }
+        private async void lvCipherList_DoubleClick(object sender, MouseEventArgs e)
+        {
+            var focusedItem = lvCipherList.FocusedItem;
+            var createDate = focusedItem.SubItems[0].Text;
+            var maxEncryptionLength = focusedItem.SubItems[1].Text;
+            var serialNumber = focusedItem.SubItems[2].Text;
+
+            await LoadCipherFromCipherList(_cipherList, serialNumber);
+        }
+        private async void contextMenuCipherList_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            var focusedItem = lvCipherList.FocusedItem;
+            var createDate = focusedItem.SubItems[0].Text;
+            var maxEncryptionLength = focusedItem.SubItems[1].Text;
+            var serialNumber = focusedItem.SubItems[2].Text;
+            var cipherSendIdInt = 0;
+
+            var menuChoice = e.ClickedItem.Text;
+
+            if (menuChoice == "Send")
+            {
+                await LoadCipherFromCipherList(_cipherList, serialNumber);
+                await SendCipher();
+            }
+            else if (menuChoice == "Load")
+            {
+                await LoadCipherFromCipherList(_cipherList, serialNumber);
+            }
+
+            await RefreshCipherRequests(true);
+            await RefreshCipherList(true);
 
             return;
         }
@@ -548,23 +632,56 @@ namespace DesktopProto2
                 MessageBox.Show($"Cipher cannot be uploaded. There is no cipher loaded. Please load a cipher before sending.\n\nNote: Ciphers loaded from a file cannot be uploaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            var dialog = new SendCipherDialog();
-            dialog.ShowDialog();
+            await SendCipher();
 
+        }
+
+        private async Task SendCipher()
+        {
+            var dialogSend = new SendCipherDialog(_userList);
+            dialogSend.ShowDialog();
+            if (dialogSend.RecipientUserId == 0)
+            {
+                MessageBox.Show($"No Recipient user selected.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             var cipherSend = new CipherSend
             {
                 CipherId = _cipherObj.cipherId,
                 SenderUserId = _selectedUserId,
-                RecipientUserId = 3,
+                RecipientUserId = dialogSend.RecipientUserId,
                 StartingPoint = _cipherObj.startingPoint
             };
             await QuantumHubProvider.SendCipher(cipherSend);
         }
 
-        private void cbLoginUsername_SelectionChangeCommitted(object sender, EventArgs e)
+        private async void cbLoginUsername_SelectionChangeCommitted(object sender, EventArgs e)
         {
+            cbLoginUsername.BackColor = Color.Empty;
             _userList.TryGetValue(cbLoginUsername.SelectedItem.ToString(), out _selectedUserId);
+            await RefreshCipherRequests(true);
+            await RefreshCipherList(true);
+        }
+
+        private void cbLoginUsername_Click(object sender, EventArgs e)
+        {
+            cbLoginUsername.BackColor = Color.Empty;
+        }
+
+        private void cbLoginUsername_DropDown(object sender, EventArgs e)
+        {
+            cbLoginUsername.BackColor = Color.Empty;
+        }
+
+        private string GetUserNameFromId(int userId)
+        {
+            foreach(var name in _userList.Keys)
+            {
+                if (userId == _userList[name])
+                    return name;
+            }
+            return string.Empty;
         }
     }
 }

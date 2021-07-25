@@ -20,6 +20,7 @@ namespace QuantumConsoleDesktop.Models
         public string serialNumber { get; set; }
         public int startingPoint { get; set; }
         public string cipherString { get; set; }
+        public int maxEncryptionLength { get; set; }
     }
 
     public class CipherList
@@ -41,6 +42,8 @@ namespace QuantumConsoleDesktop.Models
         public string AcceptDenyStatus { get; set; }
         public DateTime AcceptDenyStatusDateTime { get; set; }
         public DateTime CreateDate { get; set; }
+        public int MaxEncryptionLength { get; set; }
+
 
     }
 

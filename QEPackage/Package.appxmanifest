@@ -9,7 +9,7 @@
   <Identity
     Name="e6fe3cd7-f050-4644-9738-5a1158db1f85"
     Publisher="CN=Gary Smith"
-    Version="1.0.7.0" />
+    Version="1.0.8.0" />
 
   <Properties>
     <DisplayName>QuantumConsole</DisplayName>

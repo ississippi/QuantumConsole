@@ -69,11 +69,13 @@ namespace DesktopProto2
             this.btnRefreshCipherList = new System.Windows.Forms.Button();
             this.lvCipherList = new System.Windows.Forms.ListView();
             this.colCreated = new System.Windows.Forms.ColumnHeader();
+            this.colMaxEncrypt = new System.Windows.Forms.ColumnHeader();
             this.colSerialNumber = new System.Windows.Forms.ColumnHeader();
             this.lvCipherRequestList = new System.Windows.Forms.ListView();
             this.colRequestFrom = new System.Windows.Forms.ColumnHeader();
             this.colRequestDateTIme = new System.Windows.Forms.ColumnHeader();
             this.colRequestCipherLen = new System.Windows.Forms.ColumnHeader();
+            this.colSendId = new System.Windows.Forms.ColumnHeader();
             this.label12 = new System.Windows.Forms.Label();
             this.btnRefreshCipherRequests = new System.Windows.Forms.Button();
             this.contextMenuStripAcceptDeny = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -82,7 +84,11 @@ namespace DesktopProto2
             this.btnSendCipher = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.cbLoginUsername = new System.Windows.Forms.ComboBox();
+            this.contextMenuCipherList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripAcceptDeny.SuspendLayout();
+            this.contextMenuCipherList.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtCipherSerialNo
@@ -398,6 +404,7 @@ namespace DesktopProto2
             // 
             this.lvCipherList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colCreated,
+            this.colMaxEncrypt,
             this.colSerialNumber});
             this.lvCipherList.FullRowSelect = true;
             this.lvCipherList.GridLines = true;
@@ -409,11 +416,17 @@ namespace DesktopProto2
             this.lvCipherList.TabIndex = 41;
             this.lvCipherList.UseCompatibleStateImageBehavior = false;
             this.lvCipherList.View = System.Windows.Forms.View.Details;
+            this.lvCipherList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lvCipherList_Click);
+            this.lvCipherList.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvCipherList_DoubleClick);
             // 
             // colCreated
             // 
             this.colCreated.Text = "Created";
             this.colCreated.Width = 120;
+            // 
+            // colMaxEncrypt
+            // 
+            this.colMaxEncrypt.Text = "MaxEncrypt";
             // 
             // colSerialNumber
             // 
@@ -425,7 +438,8 @@ namespace DesktopProto2
             this.lvCipherRequestList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colRequestFrom,
             this.colRequestDateTIme,
-            this.colRequestCipherLen});
+            this.colRequestCipherLen,
+            this.colSendId});
             this.lvCipherRequestList.FullRowSelect = true;
             this.lvCipherRequestList.GridLines = true;
             this.lvCipherRequestList.HideSelection = false;
@@ -452,6 +466,10 @@ namespace DesktopProto2
             // 
             this.colRequestCipherLen.Text = "Cipher Length";
             this.colRequestCipherLen.Width = 100;
+            // 
+            // colSendId
+            // 
+            this.colSendId.Text = "SendId";
             // 
             // label12
             // 
@@ -531,7 +549,30 @@ namespace DesktopProto2
             this.cbLoginUsername.Name = "cbLoginUsername";
             this.cbLoginUsername.Size = new System.Drawing.Size(228, 23);
             this.cbLoginUsername.TabIndex = 46;
+            this.cbLoginUsername.DropDown += new System.EventHandler(this.cbLoginUsername_DropDown);
             this.cbLoginUsername.SelectionChangeCommitted += new System.EventHandler(this.cbLoginUsername_SelectionChangeCommitted);
+            this.cbLoginUsername.Click += new System.EventHandler(this.cbLoginUsername_Click);
+            // 
+            // contextMenuCipherList
+            // 
+            this.contextMenuCipherList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadToolStripMenuItem,
+            this.sendToolStripMenuItem});
+            this.contextMenuCipherList.Name = "contextMenuCipherList";
+            this.contextMenuCipherList.Size = new System.Drawing.Size(101, 48);
+            this.contextMenuCipherList.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuCipherList_ItemClicked);
+            // 
+            // loadToolStripMenuItem
+            // 
+            this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.loadToolStripMenuItem.Text = "Load";
+            // 
+            // sendToolStripMenuItem
+            // 
+            this.sendToolStripMenuItem.Name = "sendToolStripMenuItem";
+            this.sendToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.sendToolStripMenuItem.Text = "Send";
             // 
             // QuantumConsoleForm
             // 
@@ -581,6 +622,7 @@ namespace DesktopProto2
             this.Name = "QuantumConsoleForm";
             this.Text = "QuantumLock Encrypt";
             this.contextMenuStripAcceptDeny.ResumeLayout(false);
+            this.contextMenuCipherList.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -625,7 +667,6 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnRefreshCipherList;
         private System.Windows.Forms.ListView lvCipherList;
         private System.Windows.Forms.ColumnHeader colCreated;
-        private System.Windows.Forms.ColumnHeader colSerialNumber;
         private System.Windows.Forms.ListView lvCipherRequestList;
         private System.Windows.Forms.ColumnHeader colRequestFrom;
         private System.Windows.Forms.ColumnHeader colRequestDateTIme;
@@ -638,6 +679,12 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnSendCipher;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.ComboBox cbLoginUsername;
+        private System.Windows.Forms.ColumnHeader colMaxEncrypt;
+        private System.Windows.Forms.ColumnHeader colSerialNumber;
+        private System.Windows.Forms.ColumnHeader colSendId;
+        private System.Windows.Forms.ContextMenuStrip contextMenuCipherList;
+        private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sendToolStripMenuItem;
     }
 }
 
