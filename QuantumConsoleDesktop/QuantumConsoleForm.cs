@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading;
@@ -25,6 +26,7 @@ namespace DesktopProto2
         const string SELECT_A_FILE_TO_ENCRYPT = "Select a file to encrypt";
         byte[] _encryptedBytes;
         byte[] _unEncryptedBytes;
+        byte[] _loadedFileBytes;
         Cipher _cipherObj;
         CipherList _cipherList = null;
         readonly string _cipherVersion = "10";
@@ -63,6 +65,17 @@ namespace DesktopProto2
             _userList.Add("Marcianus Delia", 8);
             _userList.Add("Hermolaos Lance", 9);
             _userList.Add("Valerius Zenais", 10);
+        }
+
+        private void QuantumConsoleForm_Load()
+        {
+            //this.Text = GetQuantumConsoleVersion();
+        }
+
+        private string GetQuantumConsoleVersion()
+        {
+            Version version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version.ToString();
         }
 
         private void SetText(string text)
@@ -235,10 +248,11 @@ namespace DesktopProto2
                 return;
             }
             //_cipher = GetRandomCipher(cipherLen);
-            _cipherObj = await QuantumHubProvider.GetNewCipher(1, cipherLen);
+            _cipherObj = await QuantumHubProvider.GetNewCipher(_selectedUserId, cipherLen);
             SaveCipher();
             txtCipherFileSize.Text = _cipherObj.cipherString.Length.ToString();
             txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipherObj.cipherString);
+            txtSetPoint.Text = _cipherObj.startingPoint.ToString();
             var cipherArr = new byte[_cipherObj.cipherString.Length];
             var idx = 0;
             QuantumEncrypt.CopyStringToByteArray(_cipherObj.cipherString, ref cipherArr, ref idx);
@@ -321,12 +335,12 @@ namespace DesktopProto2
 
         private async void txtEncryptedFilename_Enter(object sender, EventArgs e)
         {
-            LoadFileToEncrypt();
+            LoadFileToEncryptOrDecrypt();
         }
 
         private void btnOpenFileToEncrypt_Click(object sender, EventArgs e)
         {
-            LoadFileToEncrypt();
+            LoadFileToEncryptOrDecrypt();
         }
 
         private void btnOpenCipherFile_Click(object sender, EventArgs e)
@@ -336,7 +350,7 @@ namespace DesktopProto2
             LoadCipherFile();
         }
 
-        private async void LoadFileToEncrypt()
+        private async void LoadFileToEncryptOrDecrypt()
         {
             txtCipherEncryptStartLocation.Enabled = true;
             txtEncryptedFilename.BackColor = Color.Empty;
@@ -345,18 +359,33 @@ namespace DesktopProto2
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     txtInputFileSize.Text = string.Empty;
-                    var watch = System.Diagnostics.Stopwatch.StartNew();
-                    _unEncryptedBytes = File.ReadAllBytes(openFileDialog1.FileName);
-                    watch.Stop();
-                    txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
-
-                    if (_unEncryptedBytes == null)
+                    _loadedFileBytes = File.ReadAllBytes(openFileDialog1.FileName);
+                    if (_loadedFileBytes == null)
+                    {
+                        MessageBox.Show($"File is empty or unable to load.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
-                    var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
-                    txtEncryptedFilename.Text = fileToEncryptFilename;
-                    txtInputFileSize.Text = _unEncryptedBytes.Length.ToString();
+                    }
+
+                    var fileType = Path.GetExtension(openFileDialog1.FileName);
+                    if (fileType.ToLower() == ".qlock")
+                    {
+                        _encryptedBytes = _loadedFileBytes;
+                        var fileToDecryptFilename = Path.GetFileName(openFileDialog1.FileName);
+                        txtEncryptedFilename.Text = fileToDecryptFilename;
+                        var serialNumber = QuantumEncrypt.GetSerialNumberFromEncryptedBytes(_encryptedBytes);
+                        if (_cipherList != null)
+                            await LoadCipherFromCipherList(_cipherList, serialNumber);
+                    }
+                    else
+                    {
+                        _unEncryptedBytes = _loadedFileBytes;
+                        var fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
+                        txtEncryptedFilename.Text = fileToEncryptFilename;
+                    }
+
+                    txtInputFileSize.Text = _loadedFileBytes.Length.ToString();
                     var hexDump = string.Empty;
-                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_unEncryptedBytes));
+                    await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_loadedFileBytes));
                     txtOutputWindow.Text = hexDump;
                 }
             }
@@ -380,6 +409,7 @@ namespace DesktopProto2
                 txtCipherSerialNo.Text = _cipherObj.serialNumber;
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
                 maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
+                txtSetPoint.Text = _cipherObj.startingPoint.ToString();
             }
         }
 
@@ -499,6 +529,7 @@ namespace DesktopProto2
                     txtCipherFileName.Text = string.Empty;
                     txtCipherSerialNo.Text = c.serialNumber;
                     maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
+                    txtSetPoint.Text = c.startingPoint.ToString();
                     var hexDump = string.Empty;
                     await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipherObj.cipherString));
                     txtOutputWindow.Text = hexDump; 
@@ -506,7 +537,7 @@ namespace DesktopProto2
                     return;
                 }
             }
-            MessageBox.Show($"The selected Cipher was not found. SerialNumber:  {serialNumber}.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"There is no cipher with a matching Serial Number. SerialNumber:  {serialNumber}.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private async void btnRefreshCipherRequests_Click(object sender, EventArgs e)

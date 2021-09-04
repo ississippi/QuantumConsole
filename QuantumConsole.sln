@@ -9,6 +9,12 @@ Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "QEPackage", "QEPackage\QEPa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantumEncryptLib", "QuantumEncryptLib\QuantumEncryptLib.csproj", "{2BABC10E-7046-4CD0-852B-8A31A847E574}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1C0BC5BE-4A66-47BB-B676-BBAA3C4E367E}"
+	ProjectSection(SolutionItems) = preProject
+		404.html = 404.html
+		index.html = index.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

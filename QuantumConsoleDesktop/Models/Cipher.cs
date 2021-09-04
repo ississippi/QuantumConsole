@@ -68,4 +68,19 @@ namespace QuantumConsoleDesktop.Models
         public int UserId { get; set; }
         public int CipherId { get; set; }
     }
+
+    public class CipherSetPoint
+    {
+        public string serialNumber { get; set; }
+        public int startingPoint { get; set; }
+
+    }
+    public class CipherSetPointList
+    {
+        public CipherSetPointList()
+        {
+            CipherSetPoints = new List<CipherSetPoint>();
+        }
+        public List<CipherSetPoint> CipherSetPoints { get; set; }
+    }
 }

@@ -55,7 +55,7 @@ namespace DesktopProto2
             this.btnDecrypt = new System.Windows.Forms.Button();
             this.saveCipherDialog = new System.Windows.Forms.SaveFileDialog();
             this.btnSaveCipher = new System.Windows.Forms.Button();
-            this.label9 = new System.Windows.Forms.Label();
+            this.labelApplicationTitle = new System.Windows.Forms.Label();
             this.openCipherDialog = new System.Windows.Forms.OpenFileDialog();
             this.btnEncrypt = new System.Windows.Forms.Button();
             this.progressBarECDC = new System.Windows.Forms.ProgressBar();
@@ -87,6 +87,8 @@ namespace DesktopProto2
             this.contextMenuCipherList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label9 = new System.Windows.Forms.Label();
+            this.txtSetPoint = new System.Windows.Forms.TextBox();
             this.contextMenuStripAcceptDeny.SuspendLayout();
             this.contextMenuCipherList.SuspendLayout();
             this.SuspendLayout();
@@ -135,9 +137,9 @@ namespace DesktopProto2
             // 
             // maxEncryptFileSize
             // 
-            this.maxEncryptFileSize.Location = new System.Drawing.Point(67, 379);
+            this.maxEncryptFileSize.Location = new System.Drawing.Point(188, 379);
             this.maxEncryptFileSize.Name = "maxEncryptFileSize";
-            this.maxEncryptFileSize.Size = new System.Drawing.Size(230, 23);
+            this.maxEncryptFileSize.Size = new System.Drawing.Size(109, 23);
             this.maxEncryptFileSize.TabIndex = 8;
             this.maxEncryptFileSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.maxEncryptFileSize.Click += new System.EventHandler(this.maxEncryptedFileSize_Enter);
@@ -146,11 +148,11 @@ namespace DesktopProto2
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(67, 361);
+            this.label2.Location = new System.Drawing.Point(188, 361);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(219, 15);
+            this.label2.Size = new System.Drawing.Size(96, 15);
             this.label2.TabIndex = 9;
-            this.label2.Text = "Max File Size Loaded Cipher can Encrypt";
+            this.label2.Text = "Max Encrypt Size";
             // 
             // txtCipherFileName
             // 
@@ -182,9 +184,9 @@ namespace DesktopProto2
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(67, 173);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(120, 15);
+            this.label4.Size = new System.Drawing.Size(178, 15);
             this.label4.TabIndex = 13;
-            this.label4.Text = "Load a File to Encrypt";
+            this.label4.Text = "Load a File to Encrypt or Decrypt";
             // 
             // txtEncryptedFileSize
             // 
@@ -291,15 +293,15 @@ namespace DesktopProto2
             this.btnSaveCipher.UseVisualStyleBackColor = true;
             this.btnSaveCipher.Click += new System.EventHandler(this.btnSaveCipher_Click);
             // 
-            // label9
+            // labelApplicationTitle
             // 
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(309, 9);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(255, 30);
-            this.label9.TabIndex = 27;
-            this.label9.Text = "QuantumLock Encryption";
+            this.labelApplicationTitle.AutoSize = true;
+            this.labelApplicationTitle.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.labelApplicationTitle.Location = new System.Drawing.Point(309, 9);
+            this.labelApplicationTitle.Name = "labelApplicationTitle";
+            this.labelApplicationTitle.Size = new System.Drawing.Size(255, 30);
+            this.labelApplicationTitle.TabIndex = 27;
+            this.labelApplicationTitle.Text = "QuantumLock Encryption";
             // 
             // openCipherDialog
             // 
@@ -574,11 +576,31 @@ namespace DesktopProto2
             this.sendToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.sendToolStripMenuItem.Text = "Send";
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(67, 361);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(92, 15);
+            this.label9.TabIndex = 49;
+            this.label9.Text = "Cipher Set Point";
+            // 
+            // txtSetPoint
+            // 
+            this.txtSetPoint.Location = new System.Drawing.Point(67, 379);
+            this.txtSetPoint.Name = "txtSetPoint";
+            this.txtSetPoint.ReadOnly = true;
+            this.txtSetPoint.Size = new System.Drawing.Size(115, 23);
+            this.txtSetPoint.TabIndex = 50;
+            this.txtSetPoint.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // QuantumConsoleForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1282, 594);
+            this.Controls.Add(this.txtSetPoint);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.cbLoginUsername);
             this.Controls.Add(this.btnSendCipher);
@@ -596,7 +618,7 @@ namespace DesktopProto2
             this.Controls.Add(this.btnOpenFileToEncrypt);
             this.Controls.Add(this.progressBarECDC);
             this.Controls.Add(this.btnEncrypt);
-            this.Controls.Add(this.label9);
+            this.Controls.Add(this.labelApplicationTitle);
             this.Controls.Add(this.btnSaveCipher);
             this.Controls.Add(this.btnDecrypt);
             this.Controls.Add(this.btnSave);
@@ -653,7 +675,7 @@ namespace DesktopProto2
         private System.Windows.Forms.Button btnDecrypt;
         private System.Windows.Forms.SaveFileDialog saveCipherDialog;
         private System.Windows.Forms.Button btnSaveCipher;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label labelApplicationTitle;
         private System.Windows.Forms.OpenFileDialog openCipherDialog;
         private System.Windows.Forms.Button btnEncrypt;
         private System.Windows.Forms.ProgressBar progressBarECDC;
@@ -685,6 +707,8 @@ namespace DesktopProto2
         private System.Windows.Forms.ContextMenuStrip contextMenuCipherList;
         private System.Windows.Forms.ToolStripMenuItem loadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sendToolStripMenuItem;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox txtSetPoint;
     }
 }
 
