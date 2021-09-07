@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using QuantumEncryptLib;
 using QuantumEncryptPoCDesktop;
 using QuantumConsoleDesktop;
+using QuantumConsoleDesktop.Common;
 using QuantumConsoleDesktop.Models;
 using QuantumConsoleDesktop.Providers;
 
@@ -491,6 +492,11 @@ namespace DesktopProto2
         private async void btnRefreshCipherList_Click(object sender, EventArgs e)
         {
             await RefreshCipherList();
+            if (_cipherList == null || _cipherList.Ciphers == null || _cipherList.Ciphers.Count == 0)
+                return;
+            var spManager = SetPointManager.Instance;
+            var isNull = await spManager.IsCipherSetPointListNull();
+            await spManager.BuildNewSetPointList(_selectedUserId, _cipherList);
         }
 
         private async Task RefreshCipherList(bool supressNoRequests = false)
