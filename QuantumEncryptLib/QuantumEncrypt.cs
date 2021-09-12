@@ -2,6 +2,8 @@
 using System.Security.Cryptography;
 using System.Text;
 
+using QuantumEncryptModels;
+
 namespace QuantumEncryptLib
 {
     public static class QuantumEncrypt
@@ -49,14 +51,30 @@ namespace QuantumEncryptLib
 
             return result;
         }
-        public static byte[] Decrypt(byte[] arr, string cipher, int cipherEncryptionBegin, IProgress<int> progress, ref string reason)
+        public static byte[] Decrypt(byte[] arr, Cipher cipherObj, IProgress<int> progress, ref string reason)
         {
             var newArrayLen = arr.Length - ENCRYPTED_FILE_PREFIX;
-            if (!IsValidForDecryption(arr, cipher, newArrayLen, ref reason))
+
+            var cipherStartLocation = GetCipherStartLocation(arr);
+            if (cipherStartLocation < 0 || cipherStartLocation > cipherObj.cipherString.Length)
+            {
+                reason = $"Cipher Start Location from the encrypted file is not valid.\n\n";
+                return null;
+            }
+            var cipherSerial = string.Empty;
+            var encryptedSerial = string.Empty;
+            if (!IsSerialNoMatchForDecryption(arr, cipherObj.cipherString, ref cipherSerial, ref encryptedSerial))
+            {
+                reason = $"Serial Numbers do not match. \nCipher: {cipherSerial} \nFile: {encryptedSerial}.";
+                return null;
+            }
+            var cipherSetPointOffset = GetCipherSetPointOffset(arr);
+
+            if (!IsValidForDecryption(arr, cipherObj.cipherString, newArrayLen, ref reason))
                 return null;
 
             // Decrypt and remove filename from the unencrypted byte array
-            var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipher, cipherEncryptionBegin, newArrayLen, progress);
+            var unencryptedWithFilename = ECDC(arr, ENCRYPTED_FILE_PREFIX, cipherObj.cipherString, cipherSetPointOffset, newArrayLen, progress);
             var newArray = StripFileName(unencryptedWithFilename);
 
             return newArray;
@@ -143,6 +161,14 @@ namespace QuantumEncryptLib
 
             return startLocation;
         }
+        public static int GetCipherSetPointOffset(byte[] arrEncrypted)
+        {
+            var strSetPoint = CopyBytesToString(arrEncrypted, CIPHER_SERIAL_NO_LEN, CIPHER_START_LOCATION_LEN);
+            var setPoint = -1;
+            Int32.TryParse(strSetPoint, out setPoint);
+
+            return setPoint;
+        }
         public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
         {
             foreach (char c in str.ToCharArray())
@@ -174,9 +200,9 @@ namespace QuantumEncryptLib
 
             return CIPHER_START + fileToEncryptLen;
         }
-        public static int GetMaxFileSizeForEncryption(string cipherString)
+        public static int GetMaxFileSizeForEncryption(Cipher cipherObj, int setPoint)
         {
-            return cipherString.Length - CIPHER_START;
+            return (cipherObj.cipherString.Length - CIPHER_START) - setPoint;
         }
         public static string GetSerialNumberFromEncryptedBytes(byte[] encryptedBytes)
         {

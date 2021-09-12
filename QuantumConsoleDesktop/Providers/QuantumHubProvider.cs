@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using QuantumConsoleDesktop.Common;
 using QuantumConsoleDesktop.Models;
+using QuantumEncryptModels;
 
 namespace QuantumConsoleDesktop.Providers
 {

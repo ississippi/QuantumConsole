@@ -19,6 +19,7 @@ namespace QuantumConsoleDesktop.Models
         {
             CipherSetPoints = new Dictionary<string, string>();
         }
+        // Dictionary Key: serialNumber, Value: setPoint
         public Dictionary<string, string>CipherSetPoints { get; set; }
     }
 

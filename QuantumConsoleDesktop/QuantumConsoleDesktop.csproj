@@ -18,6 +18,7 @@
     <ProjectReference Include="..\QuantumEncryptLib\QuantumEncryptLib.csproj">
       <Private>true</Private>
     </ProjectReference>
+    <ProjectReference Include="..\QuantumEncryptModels\QuantumEncryptModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

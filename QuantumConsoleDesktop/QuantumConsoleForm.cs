@@ -18,6 +18,7 @@ using QuantumConsoleDesktop;
 using QuantumConsoleDesktop.Common;
 using QuantumConsoleDesktop.Models;
 using QuantumConsoleDesktop.Providers;
+using QuantumEncryptModels;
 
 namespace DesktopProto2
 {
@@ -52,9 +53,6 @@ namespace DesktopProto2
             saveCipherDialog.Filter = "Cipher files (*.cipher)|*.cipher";
             saveCipherDialog.Title = "Save cipher file";
 
-            txtCipherEncryptStartLocation.Enabled = true;
-            txtCipherEncryptStartLocation.Text = "0";
-
             _userList = new Dictionary<string, int>();
             _userList.Add("Archer Conrad", 1);
             _userList.Add("Arvel Alma", 2);
@@ -88,6 +86,7 @@ namespace DesktopProto2
             int cipherStartLocation;
             try
             {
+                var spm = SetPointManager.Instance;
                 if (_unEncryptedBytes == null)
                 {
                     txtEncryptedFilename.BackColor = Color.Red;
@@ -101,16 +100,10 @@ namespace DesktopProto2
                     MessageBox.Show($"No cipher loaded. \n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (txtCipherEncryptStartLocation.Text.Length < 1)
+                var userCipherSetPoint = await spm.GetSetPoint(_selectedUserId, _cipherObj.serialNumber);
+                if (userCipherSetPoint < 0)
                 {
-                    txtCipherEncryptStartLocation.BackColor = Color.Red;
-                    MessageBox.Show($"Must specify a value for \"Cipher Start Location After Reserved Bytes\".\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (!Int32.TryParse(txtCipherEncryptStartLocation.Text, out cipherStartLocation))
-                {
-                    txtCipherEncryptStartLocation.BackColor = Color.Red;
-                    MessageBox.Show($"Cipher Start Location After Reserved Bytes value is invalid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Cipher set point is not found for user for cipher serial number:{_cipherObj.serialNumber}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -120,12 +113,11 @@ namespace DesktopProto2
 
                 });
                 _fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
-                txtCipherEncryptStartLocation.Enabled = true;
 
                 // About to Encrypt, start a timer
                 var reason = string.Empty;
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipherObj.cipherString, cipherStartLocation, _cipherObj.serialNumber, progress, ref reason));
+                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipherObj.cipherString, userCipherSetPoint, _cipherObj.serialNumber, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -135,7 +127,8 @@ namespace DesktopProto2
                     MessageBox.Show($"Encryption failed.\n\nReason: {reason}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                txtCipherEncryptStartLocation.Enabled = false;
+                var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber);
+                txtSetPoint.Text = newSetPoint.ToString();
                 btnSave.Enabled = true;
                 UpdateFormFields();
 
@@ -171,28 +164,12 @@ namespace DesktopProto2
 
                 });
 
-                var cipherStartLocation = QuantumEncrypt.GetCipherStartLocation(_encryptedBytes);
-                if (cipherStartLocation < 0 || cipherStartLocation > _cipherObj.cipherString.Length)
-                {
-                    MessageBox.Show($"Cipher Start Location from the encrypted file is not valid.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
                 // About to Encrypt, start a timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                var cipherSerial = string.Empty;
-                var encryptedSerial = string.Empty;
-                if (!QuantumEncrypt.IsSerialNoMatchForDecryption(_encryptedBytes, _cipherObj.cipherString, ref cipherSerial, ref encryptedSerial))
-                {
-                    MessageBox.Show($"Serial Numbers do not match. " +
-                        $"\nCipher: {cipherSerial} " +
-                        $"\nFile: {encryptedSerial}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
                 // Passed all validations, proceed to decryption
-                txtCipherEncryptStartLocation.Enabled = true;
                 byte[] decryptedBytes = null;
                 var reason = string.Empty;
-                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipherObj.cipherString, cipherStartLocation, progress, ref reason));
+                await Task.Run(() => decryptedBytes = QuantumEncrypt.Decrypt(_encryptedBytes, _cipherObj, progress, ref reason));
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
                 // Encryption Completed.
@@ -201,11 +178,13 @@ namespace DesktopProto2
                     MessageBox.Show($"Decryption failed. Reason: {reason}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                txtOutputWindow.Text = QuantumEncrypt.HexDump(decryptedBytes);
-                txtEncryptedFileSize.Text = decryptedBytes.Length.ToString();
+                _unEncryptedBytes = decryptedBytes;
+
+                txtOutputWindow.Text = QuantumEncrypt.HexDump(_unEncryptedBytes);
+                txtEncryptedFileSize.Text = _unEncryptedBytes.Length.ToString();
                 btnSave.Enabled = true;
 
-                var dialog = new EncryptionCompleteDialog(false, decryptedBytes, _fileToEncryptFilename);
+                var dialog = new EncryptionCompleteDialog(false, _unEncryptedBytes, _fileToEncryptFilename);
 
                 //Thread.Sleep(1000);
                 dialog.ShowDialog();
@@ -251,6 +230,8 @@ namespace DesktopProto2
             //_cipher = GetRandomCipher(cipherLen);
             _cipherObj = await QuantumHubProvider.GetNewCipher(_selectedUserId, cipherLen);
             SaveCipher();
+            var spm = SetPointManager.Instance;
+            await spm.AddNewCipher(_selectedUserId, _cipherObj.serialNumber);
             txtCipherFileSize.Text = _cipherObj.cipherString.Length.ToString();
             txtCipherSerialNo.Text = QuantumEncrypt.GetSerialNumberFromCipher(_cipherObj.cipherString);
             txtSetPoint.Text = _cipherObj.startingPoint.ToString();
@@ -258,50 +239,6 @@ namespace DesktopProto2
             var idx = 0;
             QuantumEncrypt.CopyStringToByteArray(_cipherObj.cipherString, ref cipherArr, ref idx);
             txtOutputWindow.Text = QuantumEncrypt.HexDump(cipherArr);
-        }
-        //private void rbUseExistingCipher_CheckedChanged(object sender, EventArgs e)
-        //{
-        //    btnGetNewCipher.Visible = false;
-        //    btnSave.Enabled = false;
-        //    maxEncryptFileSize.Enabled = false;
-        //    txtCipherFileName.Enabled = true;
-        //    txtCipherSerialNo.Enabled = false;
-        //    txtInputFileSize.Enabled = false;
-        //    txtEncryptedFilename.Enabled = true;
-        //    txtCipherEncryptStartLocation.Enabled = true;
-        //    txtCipherEncryptStartLocation.Text = "0";
-        //}
-
-        //private void rbGenerateNewCipher_CheckedChanged(object sender, EventArgs e)
-        //{
-        //    btnGetNewCipher.Visible = true;
-        //    btnSave.Enabled = false;
-        //    maxEncryptFileSize.Enabled = true;
-        //    txtCipherFileName.Enabled = false;
-        //    txtCipherSerialNo.Enabled = true;
-        //    txtInputFileSize.Enabled = false;
-        //    txtEncryptedFilename.Enabled = true;
-        //    txtCipherEncryptStartLocation.Enabled = false;
-        //    txtCipherEncryptStartLocation.Text = "0";
-        //}
-
-        //private void rbAutoGenerateCipher_CheckedChanged(object sender, EventArgs e)
-        //{
-        //    maxEncryptFileSize.Enabled = true;
-        //    btnGetNewCipher.Visible = false;
-        //    btnSave.Enabled = false;
-        //    maxEncryptFileSize.Enabled = false;
-        //    txtCipherFileName.Enabled = false;
-        //    txtCipherSerialNo.Enabled = false;
-        //    txtInputFileSize.Enabled = false;
-        //    txtEncryptedFilename.Enabled = true;
-        //    txtCipherEncryptStartLocation.Enabled = true;
-        //    txtCipherEncryptStartLocation.Text = "0";
-        //}
-
-        private void txtCipherEncryptStartLocation_Enter(object sender, EventArgs e)
-        {
-            txtCipherEncryptStartLocation.BackColor = Color.Empty;
         }
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -353,7 +290,6 @@ namespace DesktopProto2
 
         private async void LoadFileToEncryptOrDecrypt()
         {
-            txtCipherEncryptStartLocation.Enabled = true;
             txtEncryptedFilename.BackColor = Color.Empty;
             try
             {
@@ -409,8 +345,11 @@ namespace DesktopProto2
                 _cipherObj.serialNumber = QuantumEncrypt.GetSerialNumberFromCipher(_cipherObj.cipherString);
                 txtCipherSerialNo.Text = _cipherObj.serialNumber;
                 txtCipherFileName.Text = Path.GetFileName(openCipherDialog.FileName);
-                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
+                var spm = SetPointManager.Instance;
+                await spm.AddNewCipher(_selectedUserId, _cipherObj.serialNumber);
+                var setPoint = await LoadSetPoint();
                 txtSetPoint.Text = _cipherObj.startingPoint.ToString();
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, setPoint).ToString();
             }
         }
 
@@ -491,6 +430,11 @@ namespace DesktopProto2
 
         private async void btnRefreshCipherList_Click(object sender, EventArgs e)
         {
+            await RefreshCipherListFromHub();
+        }
+
+        private async Task RefreshCipherListFromHub()
+        {
             await RefreshCipherList();
             if (_cipherList == null || _cipherList.Ciphers == null || _cipherList.Ciphers.Count == 0)
                 return;
@@ -534,11 +478,12 @@ namespace DesktopProto2
                     _cipherObj = c;
                     txtCipherFileName.Text = string.Empty;
                     txtCipherSerialNo.Text = c.serialNumber;
-                    maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj.cipherString).ToString();
-                    txtSetPoint.Text = c.startingPoint.ToString();
+                    var setPoint = await LoadSetPoint();
+                    maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, setPoint).ToString();
+                    txtSetPoint.Text = setPoint.ToString();
                     var hexDump = string.Empty;
                     await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipherObj.cipherString));
-                    txtOutputWindow.Text = hexDump; 
+                    txtOutputWindow.Text = hexDump;
                     
                     return;
                 }
@@ -719,6 +664,14 @@ namespace DesktopProto2
                     return name;
             }
             return string.Empty;
+        }
+
+        private async Task<int> LoadSetPoint()
+        {
+            var spm = SetPointManager.Instance;
+            var setPoint = await spm.GetSetPoint(_selectedUserId, _cipherObj.serialNumber);
+            txtSetPoint.Text = setPoint.ToString();
+            return setPoint;
         }
     }
 }

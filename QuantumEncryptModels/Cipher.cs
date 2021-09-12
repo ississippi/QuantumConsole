@@ -4,14 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuantumConsoleDesktop.Models
+namespace QuantumEncryptModels
 {
-    public class NewCipherRequest
-    {
-        public int UserId { get; set; }
-        public int Length { get; set; }
-    }
-
     public class Cipher
     {
         public int cipherId { get; set; }
@@ -21,6 +15,11 @@ namespace QuantumConsoleDesktop.Models
         public int startingPoint { get; set; }
         public string cipherString { get; set; }
         public int maxEncryptionLength { get; set; }
+    }
+    public class NewCipherRequest
+    {
+        public int UserId { get; set; }
+        public int Length { get; set; }
     }
 
     public class CipherList

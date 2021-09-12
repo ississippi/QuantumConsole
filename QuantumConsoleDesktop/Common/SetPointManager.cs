@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 using QuantumConsoleDesktop.Models;
+using QuantumEncryptModels;
 
 namespace QuantumConsoleDesktop.Common
 {
@@ -30,6 +31,38 @@ namespace QuantumConsoleDesktop.Common
             }
         }
 
+        public async Task Init()
+        {
+            if (_userSetPointList == null)
+            {
+                await LoadPersistedCipherSetPointList();
+            }
+        }
+
+        public async Task AddNewCipher(int userId, string serialNumber)
+        {
+            await Init();
+            CipherSetPointList cipherSetPointList = null;
+            _userSetPointList.UserSetPoints.TryGetValue(userId, out cipherSetPointList);
+            // Add new entry for user with existing entries
+            if (cipherSetPointList != null && cipherSetPointList.CipherSetPoints != null)
+            {
+                var setPoint = string.Empty;
+                if (_userSetPointList.UserSetPoints[userId].CipherSetPoints.TryGetValue(serialNumber, out setPoint))
+                {
+                    return;
+                }
+                _userSetPointList.UserSetPoints[userId].CipherSetPoints.Add(serialNumber, "0");
+            }
+            // No entries for current user.
+            else
+            {
+                var cspl = new CipherSetPointList();
+                cspl.CipherSetPoints.Add(serialNumber, "0");
+                _userSetPointList.UserSetPoints.Add(userId, cspl);
+            }
+
+        }
         /// <summary>
         /// Check for an existing persisted CipherSetPointList
         /// </summary>
@@ -45,7 +78,7 @@ namespace QuantumConsoleDesktop.Common
             {
                 if (cipherList == null || cipherList.Ciphers == null || cipherList.Ciphers.Count == 0)
                     return;
-                await LoadPersistedCipherSetPointList();
+                await Init();
                 if (_userSetPointList != null)
                 {
                     // Clear only the current user's setPointList.
@@ -93,6 +126,7 @@ namespace QuantumConsoleDesktop.Common
         {
             if (cipherList == null || cipherList.Ciphers == null || cipherList.Ciphers.Count == 0)
                 return;
+            await Init();
             CipherSetPointList cipherSetPointList = null;
             _userSetPointList.UserSetPoints.TryGetValue(userId, out cipherSetPointList);
             if(cipherSetPointList == null)
@@ -136,25 +170,32 @@ namespace QuantumConsoleDesktop.Common
         /// <returns></returns>
         public async Task<int> IncrementSetPoint(int userId, string serialNo)
         {
+            await Init();
             CipherSetPointList cipherSetPointList = null;
-            _userSetPointList.UserSetPoints.TryGetValue(userId, out cipherSetPointList);
-            if (cipherSetPointList == null)
+            if (_userSetPointList.UserSetPoints != null)
+                _userSetPointList.UserSetPoints.TryGetValue(userId, out cipherSetPointList);
+            var newSetPoint = 0;
+            if (cipherSetPointList != null)
+            {
+                var setPoint = string.Empty;
+                if (_userSetPointList.UserSetPoints != null)
+                {
+                    _userSetPointList.UserSetPoints[userId].CipherSetPoints.TryGetValue(serialNo, out setPoint);
+                }
+                if (!string.IsNullOrEmpty(setPoint))
+                {
+                    newSetPoint = Int32.Parse(setPoint);
+                    newSetPoint++;
+                    _userSetPointList.UserSetPoints[userId].CipherSetPoints[serialNo] = newSetPoint.ToString();
+                }
+            }
+            else
             {
                 cipherSetPointList = new CipherSetPointList();
-                cipherSetPointList.CipherSetPoints.Add(serialNo, "0");
+                cipherSetPointList.CipherSetPoints.Add(serialNo, newSetPoint.ToString());
                 _userSetPointList.UserSetPoints.Add(userId, cipherSetPointList);
-                return 0;
             }
-            var setPoint = string.Empty;
-            _userSetPointList.UserSetPoints[userId].CipherSetPoints.TryGetValue(serialNo, out setPoint);
-            var newSetPoint = 0;
-            if (!string.IsNullOrEmpty(setPoint))
-            {
-                newSetPoint = Int32.Parse(setPoint);
-                newSetPoint++;
-                _userSetPointList.UserSetPoints[userId].CipherSetPoints[serialNo] = newSetPoint.ToString();
-                await SaveCipherSetPointList(_userSetPointList);
-            }
+            await SaveCipherSetPointList(_userSetPointList);
 
             return newSetPoint;
         }
@@ -164,8 +205,9 @@ namespace QuantumConsoleDesktop.Common
         /// </summary>
         /// <param name="serialNo"></param>
         /// <returns></returns>
-        public int GetSetPoint(int userId, string serialNo)
+        public async Task<int> GetSetPoint(int userId, string serialNo)
         {
+            await Init();
             CipherSetPointList cipherSetPointList = null;
             _userSetPointList.UserSetPoints.TryGetValue(userId, out cipherSetPointList);
             var setPoint = string.Empty;
@@ -177,8 +219,7 @@ namespace QuantumConsoleDesktop.Common
         private async Task LoadPersistedCipherSetPointList()
         {
             if (_userSetPointList == null)
-                _userSetPointList = new UserCipherSetPointList();
-            _userSetPointList = await GetPersistedCipherSetPointList();
+                _userSetPointList = await GetPersistedCipherSetPointList();
             if (_userSetPointList == null)
                 _userSetPointList = new UserCipherSetPointList();
         }        

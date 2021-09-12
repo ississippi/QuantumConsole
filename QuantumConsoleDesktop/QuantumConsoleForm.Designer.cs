@@ -61,8 +61,6 @@ namespace DesktopProto2
             this.progressBarECDC = new System.Windows.Forms.ProgressBar();
             this.btnOpenFileToEncrypt = new System.Windows.Forms.Button();
             this.btnOpenCipherFile = new System.Windows.Forms.Button();
-            this.txtCipherEncryptStartLocation = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.btnLoadSelectedCipher = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.btnUploadCipher = new System.Windows.Forms.Button();
@@ -109,7 +107,6 @@ namespace DesktopProto2
             this.txtOutputWindow.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtOutputWindow.Size = new System.Drawing.Size(585, 466);
             this.txtOutputWindow.TabIndex = 2;
-            this.txtOutputWindow.Enter += new System.EventHandler(this.txtCipherEncryptStartLocation_Enter);
             // 
             // openFileDialog1
             // 
@@ -156,7 +153,7 @@ namespace DesktopProto2
             // 
             // txtCipherFileName
             // 
-            this.txtCipherFileName.Location = new System.Drawing.Point(67, 238);
+            this.txtCipherFileName.Location = new System.Drawing.Point(67, 279);
             this.txtCipherFileName.Name = "txtCipherFileName";
             this.txtCipherFileName.Size = new System.Drawing.Size(199, 23);
             this.txtCipherFileName.TabIndex = 10;
@@ -165,7 +162,7 @@ namespace DesktopProto2
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(67, 220);
+            this.label3.Location = new System.Drawing.Point(67, 257);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 15);
             this.label3.TabIndex = 11;
@@ -173,7 +170,7 @@ namespace DesktopProto2
             // 
             // txtEncryptedFilename
             // 
-            this.txtEncryptedFilename.Location = new System.Drawing.Point(67, 191);
+            this.txtEncryptedFilename.Location = new System.Drawing.Point(67, 231);
             this.txtEncryptedFilename.Name = "txtEncryptedFilename";
             this.txtEncryptedFilename.Size = new System.Drawing.Size(199, 23);
             this.txtEncryptedFilename.TabIndex = 12;
@@ -182,7 +179,7 @@ namespace DesktopProto2
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(67, 173);
+            this.label4.Location = new System.Drawing.Point(67, 213);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(178, 15);
             this.label4.TabIndex = 13;
@@ -328,7 +325,7 @@ namespace DesktopProto2
             // btnOpenFileToEncrypt
             // 
             this.btnOpenFileToEncrypt.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
-            this.btnOpenFileToEncrypt.Location = new System.Drawing.Point(272, 191);
+            this.btnOpenFileToEncrypt.Location = new System.Drawing.Point(272, 230);
             this.btnOpenFileToEncrypt.Name = "btnOpenFileToEncrypt";
             this.btnOpenFileToEncrypt.Size = new System.Drawing.Size(25, 23);
             this.btnOpenFileToEncrypt.TabIndex = 30;
@@ -338,30 +335,12 @@ namespace DesktopProto2
             // btnOpenCipherFile
             // 
             this.btnOpenCipherFile.Image = global::QuantumConsoleDesktop.Properties.Resources.icons8_folder_16;
-            this.btnOpenCipherFile.Location = new System.Drawing.Point(272, 237);
+            this.btnOpenCipherFile.Location = new System.Drawing.Point(272, 278);
             this.btnOpenCipherFile.Name = "btnOpenCipherFile";
             this.btnOpenCipherFile.Size = new System.Drawing.Size(25, 23);
             this.btnOpenCipherFile.TabIndex = 31;
             this.btnOpenCipherFile.UseVisualStyleBackColor = true;
             this.btnOpenCipherFile.Click += new System.EventHandler(this.btnOpenCipherFile_Click);
-            // 
-            // txtCipherEncryptStartLocation
-            // 
-            this.txtCipherEncryptStartLocation.Location = new System.Drawing.Point(67, 285);
-            this.txtCipherEncryptStartLocation.Name = "txtCipherEncryptStartLocation";
-            this.txtCipherEncryptStartLocation.Size = new System.Drawing.Size(230, 23);
-            this.txtCipherEncryptStartLocation.TabIndex = 32;
-            this.txtCipherEncryptStartLocation.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.txtCipherEncryptStartLocation.Enter += new System.EventHandler(this.txtCipherEncryptStartLocation_Enter);
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(67, 267);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(228, 15);
-            this.label10.TabIndex = 33;
-            this.label10.Text = "Cipher Start Location After Reserved Bytes";
             // 
             // btnLoadSelectedCipher
             // 
@@ -612,8 +591,6 @@ namespace DesktopProto2
             this.Controls.Add(this.btnUploadCipher);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.btnLoadSelectedCipher);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.txtCipherEncryptStartLocation);
             this.Controls.Add(this.btnOpenCipherFile);
             this.Controls.Add(this.btnOpenFileToEncrypt);
             this.Controls.Add(this.progressBarECDC);
@@ -681,8 +658,6 @@ namespace DesktopProto2
         private System.Windows.Forms.ProgressBar progressBarECDC;
         private System.Windows.Forms.Button btnOpenFileToEncrypt;
         private System.Windows.Forms.Button btnOpenCipherFile;
-        private System.Windows.Forms.TextBox txtCipherEncryptStartLocation;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button btnLoadSelectedCipher;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button btnUploadCipher;
