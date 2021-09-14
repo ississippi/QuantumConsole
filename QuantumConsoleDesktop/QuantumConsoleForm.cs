@@ -438,9 +438,6 @@ namespace DesktopProto2
             await RefreshCipherList();
             if (_cipherList == null || _cipherList.Ciphers == null || _cipherList.Ciphers.Count == 0)
                 return;
-            var spManager = SetPointManager.Instance;
-            var isNull = await spManager.IsCipherSetPointListNull();
-            await spManager.BuildNewSetPointList(_selectedUserId, _cipherList);
         }
 
         private async Task RefreshCipherList(bool supressNoRequests = false)
@@ -467,6 +464,14 @@ namespace DesktopProto2
                 lvCipherList.Items[it].SubItems.Add(c.serialNumber);
                 it++;
             }
+
+            var spManager = SetPointManager.Instance;
+            var isNull = await spManager.IsCipherSetPointListNull();
+            if (isNull && _cipherList != null && _cipherList.Ciphers.Count > 0)
+            {
+                await spManager.BuildNewSetPointList(_selectedUserId, _cipherList);
+            }
+
         }
 
         private async Task LoadCipherFromCipherList(CipherList cList, string serialNumber)
