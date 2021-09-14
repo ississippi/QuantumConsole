@@ -466,10 +466,10 @@ namespace DesktopProto2
             }
 
             var spManager = SetPointManager.Instance;
-            var isNull = await spManager.IsCipherSetPointListNull();
-            if (isNull && _cipherList != null && _cipherList.Ciphers.Count > 0)
+            var isInSync = await spManager.IsSetPointListInSync(_selectedUserId, _cipherList);
+            if (!isInSync && _cipherList != null && _cipherList.Ciphers.Count > 0)
             {
-                await spManager.BuildNewSetPointList(_selectedUserId, _cipherList);
+                await spManager.SyncSetPointList(_selectedUserId, _cipherList);
             }
 
         }
