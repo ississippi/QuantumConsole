@@ -83,7 +83,6 @@ namespace DesktopProto2
         }
         private async void btnEncrypt_Click(object sender, EventArgs e)
         {
-            int cipherStartLocation;
             try
             {
                 var spm = SetPointManager.Instance;
@@ -127,9 +126,13 @@ namespace DesktopProto2
                     MessageBox.Show($"Encryption failed.\n\nReason: {reason}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber);
+
+                // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the semicolon delimiter.
+                var amountEncrypted = QuantumEncrypt.GetEncryptionLength(_unEncryptedBytes.Length, _fileToEncryptFilename.Length);
+                var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountEncrypted);
                 txtSetPoint.Text = newSetPoint.ToString();
                 btnSave.Enabled = true;
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, newSetPoint).ToString();
                 UpdateFormFields();
 
                 var dialog = new EncryptionCompleteDialog(true, _encryptedBytes, _fileToEncryptFilename);

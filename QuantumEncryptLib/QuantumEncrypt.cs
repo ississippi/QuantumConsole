@@ -28,15 +28,16 @@ namespace QuantumEncryptLib
             // |                              | cipher for encryption  | filename ending in ":" |                                    |
             // +------------------------------+------------------------+------------------------+------------------------------------+                              |             
             //
-            fileName += ":";  //filename delimiter ":"
-            var result = new byte[GetEncryptedFileLen(arrToEncrypt.Length, fileName.Length)];
-            var workingArray = new byte[arrToEncrypt.Length + fileName.Length];
+            var fileNameLen = fileName.Length + 1; // filename length + ":"
+            var result = new byte[GetEncryptedFileLen(arrToEncrypt.Length, fileNameLen)];
+            var workingArray = new byte[arrToEncrypt.Length + fileNameLen];
+
             var idxResult = 0;
-            var fileNameArr = new byte[fileName.Length];
+            var fileNameArr = new byte[fileNameLen];
             var idxFNArr = 0;
-            CopyStringToByteArray(fileName, ref fileNameArr, ref idxFNArr);
+            CopyStringToByteArray(fileName + ":", ref fileNameArr, ref idxFNArr);
             fileNameArr.CopyTo(workingArray, 0);
-            arrToEncrypt.CopyTo(workingArray, fileName.Length);
+            arrToEncrypt.CopyTo(workingArray, fileNameLen);
             var cipherEncryptionBegin = CIPHER_RESERVED_BYTES + cipherEncryptStart;
             var cipherStartLocation = cipherEncryptionBegin.ToString("D25");
 
@@ -169,6 +170,12 @@ namespace QuantumEncryptLib
 
             return setPoint;
         }
+
+        public static int GetEncryptionLength(int arrayLen, int filenameLen)
+        {
+            return arrayLen + filenameLen + 1;
+        }
+
         public static void CopyStringToByteArray(string str, ref byte[] arrDestination, ref int idxDestination)
         {
             foreach (char c in str.ToCharArray())

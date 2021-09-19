@@ -188,10 +188,11 @@ namespace QuantumConsoleDesktop.Common
         /// 2) Increment the persisted setpoint
         /// 3) Persist the updated CipherSetPointList
         /// 4) return the new setpoint.
+        /// Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the semicolon delimiter.
         /// </summary>
         /// <param name="serialNo"></param>
         /// <returns></returns>
-        public async Task<int> IncrementSetPoint(int userId, string serialNo)
+        public async Task<int> IncrementSetPoint(int userId, string serialNo, int incrementBy)
         {
             await Init();
             CipherSetPointList cipherSetPointList = null;
@@ -208,7 +209,7 @@ namespace QuantumConsoleDesktop.Common
                 if (!string.IsNullOrEmpty(setPoint))
                 {
                     newSetPoint = Int32.Parse(setPoint);
-                    newSetPoint++;
+                    newSetPoint += incrementBy;
                     _userSetPointList.UserSetPoints[userId].CipherSetPoints[serialNo] = newSetPoint.ToString();
                 }
             }
