@@ -188,9 +188,11 @@ namespace QuantumConsoleDesktop.Common
         /// 2) Increment the persisted setpoint
         /// 3) Persist the updated CipherSetPointList
         /// 4) return the new setpoint.
-        /// Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the semicolon delimiter.
+        /// Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the colon delimiter.
         /// </summary>
-        /// <param name="serialNo"></param>
+        /// <param name="userId">Which user to increment set point for</param>
+        /// <param name="serialNo">Which serial number for this user to increment set point for</param>
+        /// <param name="incrementBy">How much to increment the set point</param>
         /// <returns></returns>
         public async Task<int> IncrementSetPoint(int userId, string serialNo, int incrementBy)
         {

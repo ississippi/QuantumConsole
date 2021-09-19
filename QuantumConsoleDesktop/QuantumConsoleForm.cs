@@ -31,7 +31,6 @@ namespace DesktopProto2
         byte[] _loadedFileBytes;
         Cipher _cipherObj;
         CipherList _cipherList = null;
-        readonly string _cipherVersion = "10";
         string _fileToEncryptFilename = string.Empty;
         Dictionary<string, int> _userList;
         public QuantumConsoleForm()
@@ -127,7 +126,7 @@ namespace DesktopProto2
                     return;
                 }
 
-                // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the semicolon delimiter.
+                // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the colon delimiter.
                 var amountEncrypted = QuantumEncrypt.GetEncryptionLength(_unEncryptedBytes.Length, _fileToEncryptFilename.Length);
                 var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountEncrypted);
                 txtSetPoint.Text = newSetPoint.ToString();
@@ -200,6 +199,45 @@ namespace DesktopProto2
 
         }
 
+        private async Task SwitchLoggedInUser()
+        {
+            _encryptedBytes = null;
+            _unEncryptedBytes = null;
+            _loadedFileBytes = null;
+            _cipherObj = null;
+            _cipherList = null;
+            _fileToEncryptFilename = string.Empty;
+
+            ResetFormFieldBackColor();
+            maxEncryptFileSize.Text = string.Empty;
+            txtCipherFileSize.Text = string.Empty;
+            txtCipherFileName.Text = string.Empty;
+            txtCipherSerialNo.Text = string.Empty;
+            txtEncryptedFilename.Text = string.Empty;
+            txtEncryptedFileSize.Text = string.Empty;
+            txtEncryptionTimeTicks.Text = string.Empty;
+            txtOutputWindow.Text = string.Empty;
+            txtInputFileSize.Text = string.Empty;
+            txtSetPoint.Text = string.Empty;
+
+            await RefreshCipherRequests(true);
+            await RefreshCipherList(true);
+
+        }
+
+        private void ResetFormFieldBackColor()
+        {
+            maxEncryptFileSize.BackColor = Color.Empty;
+            txtCipherFileSize.BackColor = Color.Empty;
+            txtCipherFileName.BackColor = Color.Empty;
+            txtCipherSerialNo.BackColor = Color.Empty;
+            txtEncryptedFilename.BackColor = Color.Empty;
+            txtEncryptedFileSize.BackColor = Color.Empty;
+            txtEncryptionTimeTicks.BackColor = Color.Empty;
+            txtOutputWindow.BackColor = Color.Empty;
+            txtInputFileSize.BackColor = Color.Empty;
+            txtSetPoint.BackColor = Color.Empty;
+        }
         private void UpdateFormFields()
         {
             txtOutputWindow.Text = QuantumEncrypt.HexDump(_encryptedBytes);
@@ -208,6 +246,7 @@ namespace DesktopProto2
             txtInputFileSize.Text = (_unEncryptedBytes == null) ? string.Empty : _unEncryptedBytes.Length.ToString();
             txtEncryptedFileSize.Text = (_encryptedBytes == null) ? string.Empty : _encryptedBytes.Length.ToString();
         }
+
         private void maxEncryptedFileSize_Enter(object sender, EventArgs e)
         {
             maxEncryptFileSize.BackColor = Color.Empty;
@@ -293,7 +332,7 @@ namespace DesktopProto2
 
         private async void LoadFileToEncryptOrDecrypt()
         {
-            txtEncryptedFilename.BackColor = Color.Empty;
+            ResetFormFieldBackColor();
             try
             {
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -327,6 +366,16 @@ namespace DesktopProto2
                     var hexDump = string.Empty;
                     await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_loadedFileBytes));
                     txtOutputWindow.Text = hexDump;
+
+                    if ((_unEncryptedBytes != null && _unEncryptedBytes.Length > 1) && (_cipherObj != null && _cipherObj.cipherString.Length > 1))
+                    {
+                        var usableCipherLen = -1;
+                        if (!QuantumEncrypt.IsCipherLargeEnough(_unEncryptedBytes.Length, _cipherObj.cipherString, _cipherObj.startingPoint, ref usableCipherLen))
+                        {
+                            maxEncryptFileSize.BackColor = Color.Red;
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -338,6 +387,7 @@ namespace DesktopProto2
 
         private async void LoadCipherFile()
         {
+            ResetFormFieldBackColor();
             if (openCipherDialog.ShowDialog() == DialogResult.OK)
             {
                 var arr = File.ReadAllBytes(openCipherDialog.FileName);
@@ -445,18 +495,30 @@ namespace DesktopProto2
 
         private async Task RefreshCipherList(bool supressNoRequests = false)
         {
+            var progress = new Progress<int>(value =>
+            {
+                progressBarECDC.Value = value;
+
+            });
+            var reportProgress = (IProgress<int>)progress;
+            reportProgress.Report(5);
+
             if (_selectedUserId == 0)
             {
                 cbLoginUsername.BackColor = Color.Red;
                 MessageBox.Show($"Please select a user.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                reportProgress.Report(100);
                 return;
             }
+            reportProgress.Report(10);
             _cipherList = await QuantumHubProvider.GetCipherList(_selectedUserId);
+            reportProgress.Report(75);
             lvCipherList.Items.Clear();
             if (_cipherList == null || _cipherList.Ciphers.Count == 0)
             {
                 if (!supressNoRequests)
                     MessageBox.Show($"The current user has no ciphers.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                reportProgress.Report(100);
                 return;
             }
             var it = 0;
@@ -467,6 +529,7 @@ namespace DesktopProto2
                 lvCipherList.Items[it].SubItems.Add(c.serialNumber);
                 it++;
             }
+            reportProgress.Report(85);
 
             var spManager = SetPointManager.Instance;
             var isInSync = await spManager.IsSetPointListInSync(_selectedUserId, _cipherList);
@@ -474,12 +537,14 @@ namespace DesktopProto2
             {
                 await spManager.SyncSetPointList(_selectedUserId, _cipherList);
             }
+            reportProgress.Report(100);
 
         }
 
         private async Task LoadCipherFromCipherList(CipherList cList, string serialNumber)
         {
-            foreach(Cipher c in cList.Ciphers)
+            ResetFormFieldBackColor();
+            foreach (Cipher c in cList.Ciphers)
             {
                 if (c.serialNumber == serialNumber)
                 {
@@ -489,10 +554,18 @@ namespace DesktopProto2
                     var setPoint = await LoadSetPoint();
                     maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, setPoint).ToString();
                     txtSetPoint.Text = setPoint.ToString();
+                    _cipherObj.startingPoint = setPoint;
                     var hexDump = string.Empty;
                     await Task.Run(() => hexDump = QuantumEncrypt.HexDump(_cipherObj.cipherString));
                     txtOutputWindow.Text = hexDump;
-                    
+                    if (_unEncryptedBytes != null && _unEncryptedBytes.Length > 1)
+                    {
+                        var usableCipherLen = -1;
+                        if (!QuantumEncrypt.IsCipherLargeEnough(_unEncryptedBytes.Length, _cipherObj.cipherString, setPoint, ref usableCipherLen))
+                        {
+                            maxEncryptFileSize.BackColor = Color.Red;
+                        }
+                    }
                     return;
                 }
             }
@@ -506,20 +579,33 @@ namespace DesktopProto2
 
         private async Task RefreshCipherRequests(bool supressNoRequests = false)
         {
+            var progress = new Progress<int>(value =>
+            {
+                progressBarECDC.Value = value;
+
+            });
+            var reportProgress = (IProgress<int>)progress;
+            reportProgress.Report(5);
+
             lvCipherRequestList.Items.Clear();
             if (_selectedUserId == 0)
             {
                 cbLoginUsername.BackColor = Color.Red;
                 MessageBox.Show($"Please select a user.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                reportProgress.Report(100);
+
                 return;
             }
+            reportProgress.Report(10);
             var sendList = await QuantumHubProvider.GetNotifications(_selectedUserId, "pending");
             if (sendList == null || sendList.SendRequests == null || sendList.SendRequests.Count == 0)
             {
                 if (!supressNoRequests)
                     MessageBox.Show($"There are no pending requests.\n\n", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                reportProgress.Report(100);
                 return;
             }
+            reportProgress.Report(80);
 
             var it = 0;
             foreach (CipherSend s in sendList.SendRequests)
@@ -530,6 +616,7 @@ namespace DesktopProto2
                 lvCipherRequestList.Items[it].SubItems.Add(s.CipherSendId.ToString());
                 it++;
             }
+            reportProgress.Report(100);
         }
 
         private async void lvCipherRequestList_Click(object sender, MouseEventArgs e)
@@ -650,8 +737,7 @@ namespace DesktopProto2
         {
             cbLoginUsername.BackColor = Color.Empty;
             _userList.TryGetValue(cbLoginUsername.SelectedItem.ToString(), out _selectedUserId);
-            await RefreshCipherRequests(true);
-            await RefreshCipherList(true);
+            SwitchLoggedInUser();
         }
 
         private void cbLoginUsername_Click(object sender, EventArgs e)

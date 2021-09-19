@@ -116,18 +116,23 @@ namespace QuantumEncryptLib
             }
             else 
             {
-                var usableCipherLen = cipher.Length - (CIPHER_RESERVED_BYTES + cipherEncryptStart);
-                if (arr.Length > usableCipherLen)
+                var usableCipherLen = -1;
+                if (!IsCipherLargeEnough(arr.Length, cipher, cipherEncryptStart, ref usableCipherLen))
                 {
                     reason += $"\nCipher not large enough to encrypt file. ";
                     if (arr.Length < (cipher.Length - CIPHER_RESERVED_BYTES))
-                        reason += $"\nConsider lowering the cipher encrypt start location input value.";
-                    reason += $"\n\nFile to encrypt length: {arr.Length}\nCipher File Length: {cipher.Length}\nUsable Cipher Bytes: {usableCipherLen}\nCipher Encrypt Start Location: {cipherEncryptStart}";
+                    reason += $"\n\nFile to encrypt length: {arr.Length}\nCipher Length: {cipher.Length}\nUsable Cipher Bytes: {usableCipherLen}\nCipher Encrypt Start Location: {cipherEncryptStart}";
                     isValid = false;
                 }
             }
 
             return isValid;
+        }
+
+        public static bool IsCipherLargeEnough(int arrayLen, string cipher, int cipherEncryptStart, ref int usableCipherLen)
+        {
+            usableCipherLen = cipher.Length - (CIPHER_RESERVED_BYTES + cipherEncryptStart);
+            return (usableCipherLen > arrayLen);
         }
 
         private static bool IsValidForDecryption(byte[] arr, string cipher, int newArrayLen, ref string reason)
