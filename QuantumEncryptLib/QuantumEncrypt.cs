@@ -188,6 +188,24 @@ namespace QuantumEncryptLib
                 arrDestination[idxDestination++] = (byte)c;
             }
         }
+
+        public static Cipher SpawnCipherFromSegment(int userId, Cipher parentCipher, string serialNumber, int segmentStart, int segmentLength)
+        {
+            var version = "01";
+            var serialNo = serialNumber;
+            var newCipher = parentCipher.cipherString.Substring(segmentStart, segmentLength);
+            var maxEncrypt = segmentLength;
+            var cipher = new Cipher
+            {
+                cipherString = version + serialNo + newCipher,
+                maxEncryptionLength = maxEncrypt,
+                serialNumber = serialNo,
+                startingPoint = 0,
+                userId = userId
+            };
+            return cipher;
+        }
+
         public static string CopyBytesToString(byte[] arr, int idx, int len)
         {
             var newArr = new byte[len];

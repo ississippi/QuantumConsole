@@ -68,4 +68,26 @@ namespace QuantumEncryptModels
         public int CipherId { get; set; }
     }
 
+    public class CipherSerialRequest
+    {
+        public int UserId { get; set; }
+        public int Quantity { get; set; }
+
+    }
+    
+    public class CipherSerials
+    {
+        public CipherSerials()
+        {
+            SerialNumbers = new List<string>();
+        }
+        public List<string> SerialNumbers { get; set; }
+    }
+
+    public class CipherUpload
+    {
+        public int UserId { get; set; }
+        public Cipher CipherObj { get; set; }
+    }
+
 }

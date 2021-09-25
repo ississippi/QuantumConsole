@@ -8,9 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DesktopProto2;
 
-namespace QuantumEncryptPoCDesktop
+namespace QuantumConsoleDesktop
 {
     public partial class EncryptionCompleteDialog : Form
     {

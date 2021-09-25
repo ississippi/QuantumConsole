@@ -13,14 +13,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using QuantumEncryptLib;
-using QuantumEncryptPoCDesktop;
+//using QuantumEncryptPoCDesktop;
 using QuantumConsoleDesktop;
 using QuantumConsoleDesktop.Common;
 using QuantumConsoleDesktop.Models;
 using QuantumConsoleDesktop.Providers;
 using QuantumEncryptModels;
 
-namespace DesktopProto2
+namespace QuantumConsoleDesktop
 {
     public partial class QuantumConsoleForm : Form
     {
@@ -126,6 +126,8 @@ namespace DesktopProto2
                     return;
                 }
 
+                // Save current start point for a cipher segment file later if requested.
+                var oldSetPoint = _cipherObj.startingPoint;
                 // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the colon delimiter.
                 var amountEncrypted = QuantumEncrypt.GetEncryptionLength(_unEncryptedBytes.Length, _fileToEncryptFilename.Length);
                 var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountEncrypted);
@@ -138,6 +140,17 @@ namespace DesktopProto2
 
                 //Thread.Sleep(1000);
                 dialog.ShowDialog();
+                dialog.Dispose();
+
+                if (chkSpawnSegment.Checked == true)
+                {
+                    var segmentSerial = await CipherSegmentManager.GetNewSegmentSerialNumber(_selectedUserId);
+                    var newSegmentCipher = QuantumEncrypt.SpawnCipherFromSegment(_selectedUserId, _cipherObj, segmentSerial, oldSetPoint, amountEncrypted);
+                    var cipherSegmentDialog = new SaveCipherForm(newSegmentCipher);
+                    cipherSegmentDialog.ShowDialog();
+                    await QuantumHubProvider.UploadCipher(newSegmentCipher);
+                    cipherSegmentDialog.Dispose();
+                }
             }
             catch (Exception ex)
             {
@@ -403,6 +416,23 @@ namespace DesktopProto2
                 var setPoint = await LoadSetPoint();
                 txtSetPoint.Text = _cipherObj.startingPoint.ToString();
                 maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, setPoint).ToString();
+            }
+        }
+        private async void SaveCipher(Cipher cipherObj)
+        {
+            if (saveCipherDialog.ShowDialog() == DialogResult.OK)
+            {
+                var cipherBytes = new byte[cipherObj.cipherString.Length];
+                var idx = 0;
+                QuantumEncrypt.CopyStringToByteArray(_cipherObj.cipherString, ref cipherBytes, ref idx);
+                if (saveCipherDialog.FileName != "")
+                {
+                    // default extension for saved encrypted files to be .qlock
+                    FileStream fs = (System.IO.FileStream)saveCipherDialog.OpenFile();
+                    fs.Write(cipherBytes, 0, cipherObj.cipherString.Length);
+                    fs.Flush();
+                    fs.Close();
+                }
             }
         }
 

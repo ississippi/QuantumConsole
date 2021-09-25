@@ -1,7 +1,7 @@
 ﻿
 namespace QuantumConsoleDesktop
 {
-    partial class EncryptionCompleteDialog
+    partial class SaveCipherForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,21 +29,30 @@ namespace QuantumConsoleDesktop
         /// </summary>
         private void InitializeComponent()
         {
+            this.label_ECDCComplete = new System.Windows.Forms.Label();
+            this.saveCipherModal = new System.Windows.Forms.SaveFileDialog();
             this.btnModalSaveEncrypted = new System.Windows.Forms.Button();
             this.btnCancelEncrypted = new System.Windows.Forms.Button();
-            this.label_ECDCComplete = new System.Windows.Forms.Label();
-            this.saveEncryptedModal = new System.Windows.Forms.SaveFileDialog();
-            this.label_ECDCComplete_Subtitle = new System.Windows.Forms.Label();
             this.SuspendLayout();
+            // 
+            // label_ECDCComplete
+            // 
+            this.label_ECDCComplete.AutoSize = true;
+            this.label_ECDCComplete.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label_ECDCComplete.Location = new System.Drawing.Point(22, 47);
+            this.label_ECDCComplete.Name = "label_ECDCComplete";
+            this.label_ECDCComplete.Size = new System.Drawing.Size(322, 32);
+            this.label_ECDCComplete.TabIndex = 6;
+            this.label_ECDCComplete.Text = "Save New Cipher Segment?";
             // 
             // btnModalSaveEncrypted
             // 
             this.btnModalSaveEncrypted.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnModalSaveEncrypted.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnModalSaveEncrypted.Location = new System.Drawing.Point(45, 121);
+            this.btnModalSaveEncrypted.Location = new System.Drawing.Point(51, 124);
             this.btnModalSaveEncrypted.Name = "btnModalSaveEncrypted";
             this.btnModalSaveEncrypted.Size = new System.Drawing.Size(85, 35);
-            this.btnModalSaveEncrypted.TabIndex = 0;
+            this.btnModalSaveEncrypted.TabIndex = 4;
             this.btnModalSaveEncrypted.Text = "Save";
             this.btnModalSaveEncrypted.UseVisualStyleBackColor = true;
             this.btnModalSaveEncrypted.Click += new System.EventHandler(this.btnSave_Click);
@@ -51,50 +60,23 @@ namespace QuantumConsoleDesktop
             // btnCancelEncrypted
             // 
             this.btnCancelEncrypted.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnCancelEncrypted.Location = new System.Drawing.Point(225, 121);
+            this.btnCancelEncrypted.Location = new System.Drawing.Point(231, 124);
             this.btnCancelEncrypted.Name = "btnCancelEncrypted";
             this.btnCancelEncrypted.Size = new System.Drawing.Size(75, 35);
-            this.btnCancelEncrypted.TabIndex = 1;
+            this.btnCancelEncrypted.TabIndex = 5;
             this.btnCancelEncrypted.Text = "Cancel";
             this.btnCancelEncrypted.UseVisualStyleBackColor = true;
             // 
-            // label_ECDCComplete
-            // 
-            this.label_ECDCComplete.AutoSize = true;
-            this.label_ECDCComplete.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label_ECDCComplete.Location = new System.Drawing.Point(45, 36);
-            this.label_ECDCComplete.Name = "label_ECDCComplete";
-            this.label_ECDCComplete.Size = new System.Drawing.Size(255, 32);
-            this.label_ECDCComplete.TabIndex = 2;
-            this.label_ECDCComplete.Text = "Encryption Complete";
-            // 
-            // label_ECDCComplete_Subtitle
-            // 
-            this.label_ECDCComplete_Subtitle.AutoSize = true;
-            this.label_ECDCComplete_Subtitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label_ECDCComplete_Subtitle.Location = new System.Drawing.Point(50, 82);
-            this.label_ECDCComplete_Subtitle.MinimumSize = new System.Drawing.Size(250, 0);
-            this.label_ECDCComplete_Subtitle.Name = "label_ECDCComplete_Subtitle";
-            this.label_ECDCComplete_Subtitle.Size = new System.Drawing.Size(250, 21);
-            this.label_ECDCComplete_Subtitle.TabIndex = 3;
-            this.label_ECDCComplete_Subtitle.Text = "Save Encrypted File?";
-            this.label_ECDCComplete_Subtitle.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // EncryptionCompleteDialog
+            // SaveCipherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCancelEncrypted;
             this.ClientSize = new System.Drawing.Size(356, 199);
-            this.Controls.Add(this.label_ECDCComplete_Subtitle);
             this.Controls.Add(this.label_ECDCComplete);
             this.Controls.Add(this.btnCancelEncrypted);
             this.Controls.Add(this.btnModalSaveEncrypted);
-            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "EncryptionCompleteDialog";
-            this.Text = "Encryption Complete";
+            this.Name = "SaveCipherForm";
+            this.Text = "SaveCipherForm";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -102,10 +84,9 @@ namespace QuantumConsoleDesktop
 
         #endregion
 
+        private System.Windows.Forms.Label label_ECDCComplete;
+        private System.Windows.Forms.SaveFileDialog saveCipherModal;
         private System.Windows.Forms.Button btnModalSaveEncrypted;
         private System.Windows.Forms.Button btnCancelEncrypted;
-        private System.Windows.Forms.Label label_ECDCComplete;
-        private System.Windows.Forms.SaveFileDialog saveEncryptedModal;
-        private System.Windows.Forms.Label label_ECDCComplete_Subtitle;
     }
 }

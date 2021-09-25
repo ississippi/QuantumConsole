@@ -110,6 +110,45 @@ namespace QuantumConsoleDesktop.Providers
             return list;
         }
 
+        public async static Task<CipherSerials> GetCipherSerialNumberList(int userId, int quantity)
+        {
+            CipherSerials serials = null;
+            try
+            {
+                var h = await HealthCheck();
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var newRequest = new CipherSerialRequest()
+                    {
+                        UserId = userId,
+                        Quantity = quantity,
+                    };
+
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(newRequest));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string getCipherListPath = "/api/Cipher/CipherSerialRequest";
+                    var response = await httpClient.PostAsync(getCipherListPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    //var baseResponse = JsonSerializer.Deserialize<BaseResponse<Cipher>>(content);
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<CipherSerials>>(content);
+                    serials = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return serials;
+        }
+
         public async static Task<int> SendCipher(CipherSend cs)
         {
             var sendId = -1;
@@ -141,6 +180,43 @@ namespace QuantumConsoleDesktop.Providers
             }
 
             return sendId;
+        }
+
+        public async static Task<int> UploadCipher(Cipher cu)
+        {
+            var newCipherId = -1;
+            try
+            {
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    httpClient.BaseAddress = new Uri(GetQuantumHubBaseAddress());
+                    httpClient.DefaultRequestHeaders.Accept.Clear();
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", ".NET Quantum Console");
+                    httpClient.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var newRequest = new CipherUpload()
+                    {
+                        UserId = cu.userId,
+                        CipherObj = cu
+                    };
+
+                    HttpContent httpContent = new StringContent(JsonConvert.SerializeObject(newRequest));
+                    httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    string uploadCipherPath = "/api/Cipher/UploadCipher";
+                    var response = await httpClient.PostAsync(uploadCipherPath, httpContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var baseResponse = JsonConvert.DeserializeObject<BaseResponse<int>>(content);
+                    newCipherId = baseResponse.Data;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return newCipherId;
         }
 
         public async static Task<Cipher> AcceptDeny(CipherAcceptDeny ad)
