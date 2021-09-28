@@ -33,9 +33,20 @@ namespace QuantumConsoleDesktop.Common
 
         public static async Task<string> GetNextSerialAndRemove(int userId)
         {
+            var serialNumber = string.Empty;
             await Init(userId);
 
-            var serialNumber = _cipherSerialList.SerialNumbers[0];
+            //foreach (var sno in _cipherSerialList.SerialNumbers)
+            //{
+            //    // TEMP: DEBUGGING - find a serial number beginning with 0.
+            //    if (sno.Substring(0, 1) == "0")
+            //    {
+            //        serialNumber = sno;
+            //        break;
+            //    }
+            //    continue;
+            //}
+            serialNumber = _cipherSerialList.SerialNumbers[0];
             _cipherSerialList.SerialNumbers.RemoveAt(0);
 
             return serialNumber;

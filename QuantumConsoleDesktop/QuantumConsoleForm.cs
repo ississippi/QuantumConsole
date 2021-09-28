@@ -82,28 +82,11 @@ namespace QuantumConsoleDesktop
         }
         private async void btnEncrypt_Click(object sender, EventArgs e)
         {
+            Cipher childCipher = null;
             try
             {
-                var spm = SetPointManager.Instance;
-                if (_unEncryptedBytes == null)
-                {
-                    txtEncryptedFilename.BackColor = Color.Red;
-                    MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (await IsValidForEncryption() == false)
                     return;
-                }
-                if (_cipherObj == null || string.IsNullOrEmpty(_cipherObj.cipherString))
-                {
-                    txtCipherFileName.BackColor = Color.Red;
-                    btnLoadSelectedCipher.BackColor = Color.Red;
-                    MessageBox.Show($"No cipher loaded. \n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                var userCipherSetPoint = await spm.GetSetPoint(_selectedUserId, _cipherObj.serialNumber);
-                if (userCipherSetPoint < 0)
-                {
-                    MessageBox.Show($"Cipher set point is not found for user for cipher serial number:{_cipherObj.serialNumber}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
 
                 var progress = new Progress<int>(value =>
                 {
@@ -112,43 +95,65 @@ namespace QuantumConsoleDesktop
                 });
                 _fileToEncryptFilename = Path.GetFileName(openFileDialog1.FileName);
 
-                // About to Encrypt, start a timer
+                // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the colon delimiter.
+                var amountToEncrypt = QuantumEncrypt.GetEncryptionLength(_unEncryptedBytes.Length, _fileToEncryptFilename.Length);
+                // Save current start point.
+                var oldSetPoint = _cipherObj.startingPoint;
                 var reason = string.Empty;
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                await Task.Run( () => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipherObj.cipherString, userCipherSetPoint, _cipherObj.serialNumber, progress, ref reason));
+                var spm = SetPointManager.Instance;
+                if (chkSpawnSegment.Checked == true)
+                {
+                    // Build a child cipher from the original cipher
+                    var segmentSerial = await CipherSegmentManager.GetNewSegmentSerialNumber(_selectedUserId);
+                    childCipher = QuantumEncrypt.SpawnCipherFromSegment(_selectedUserId, _cipherObj, segmentSerial, oldSetPoint, amountToEncrypt);
+                    // *********************
+                    // ****** ENCRYPT ******
+                    // *********************
+                    // About to Encrypt, start a timer
+                    await Task.Run(() => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, childCipher.cipherString, childCipher.startingPoint, childCipher.serialNumber, progress, ref reason));
+                    await QuantumHubProvider.UploadCipher(childCipher);
+
+                    // We still need to increment and save the new setpoint on the parent.
+                    var parentCipherSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountToEncrypt);
+
+                    // Replace the in-context parent cipher with the child cipher
+                    _cipherObj = childCipher.DeepCopy<Cipher>();
+                }
+                else
+                {
+                    // *********************
+                    // ****** ENCRYPT ******
+                    // *********************
+                    // About to Encrypt, start a timer
+                    var userCipherSetPoint = await spm.GetSetPoint(_selectedUserId, _cipherObj.serialNumber);
+                    await Task.Run(() => _encryptedBytes = QuantumEncrypt.Encrypt(_fileToEncryptFilename, _unEncryptedBytes, _cipherObj.cipherString, userCipherSetPoint, _cipherObj.serialNumber, progress, ref reason));
+                    // Increment the set point of the parent cipher whether or not a child cipher was used.
+                    var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountToEncrypt);
+                    _cipherObj.startingPoint = newSetPoint;
+                }
+                // Encryption Completed.
                 watch.Stop();
                 txtEncryptionTimeTicks.Text = watch.ElapsedTicks.ToString();
-                // Encryption Completed.
-
                 if (_encryptedBytes == null)
                 {
                     MessageBox.Show($"Encryption failed.\n\nReason: {reason}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
-                // Save current start point for a cipher segment file later if requested.
-                var oldSetPoint = _cipherObj.startingPoint;
-                // Set Points are incremented by the length of the last encrypted file + the length of the filename + 1 byte for the colon delimiter.
-                var amountEncrypted = QuantumEncrypt.GetEncryptionLength(_unEncryptedBytes.Length, _fileToEncryptFilename.Length);
-                var newSetPoint = await spm.IncrementSetPoint(_selectedUserId, _cipherObj.serialNumber, amountEncrypted);
-                txtSetPoint.Text = newSetPoint.ToString();
                 btnSave.Enabled = true;
-                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, newSetPoint).ToString();
+                txtSetPoint.Text = _cipherObj.startingPoint.ToString();
+                maxEncryptFileSize.Text = QuantumEncrypt.GetMaxFileSizeForEncryption(_cipherObj, _cipherObj.startingPoint).ToString();
                 UpdateFormFields();
 
+                // Save the encrypted file
                 var dialog = new EncryptionCompleteDialog(true, _encryptedBytes, _fileToEncryptFilename);
-
-                //Thread.Sleep(1000);
                 dialog.ShowDialog();
                 dialog.Dispose();
-
+                // Save the child cipher if one was created.
                 if (chkSpawnSegment.Checked == true)
                 {
-                    var segmentSerial = await CipherSegmentManager.GetNewSegmentSerialNumber(_selectedUserId);
-                    var newSegmentCipher = QuantumEncrypt.SpawnCipherFromSegment(_selectedUserId, _cipherObj, segmentSerial, oldSetPoint, amountEncrypted);
-                    var cipherSegmentDialog = new SaveCipherForm(newSegmentCipher);
+                    var cipherSegmentDialog = new SaveCipherForm(childCipher);
                     cipherSegmentDialog.ShowDialog();
-                    await QuantumHubProvider.UploadCipher(newSegmentCipher);
                     cipherSegmentDialog.Dispose();
                 }
             }
@@ -156,6 +161,42 @@ namespace QuantumConsoleDesktop
             {
                 MessageBox.Show($"btnEncrypt_Click() Exception.\n\nError message: {ex.Message}\n\nDetails:\n\n{ex.StackTrace}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private async Task<bool> IsValidForEncryption()
+        {
+            var spm = SetPointManager.Instance;
+
+            if (_unEncryptedBytes == null)
+            {
+                txtEncryptedFilename.BackColor = Color.Red;
+                MessageBox.Show($"File to encrypt is not loaded.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (_cipherObj == null || string.IsNullOrEmpty(_cipherObj.cipherString))
+            {
+                txtCipherFileName.BackColor = Color.Red;
+                btnLoadSelectedCipher.BackColor = Color.Red;
+                MessageBox.Show($"No cipher loaded. \n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            var userCipherSetPoint = await spm.GetSetPoint(_selectedUserId, _cipherObj.serialNumber);
+            if (userCipherSetPoint < 0)
+            {
+                MessageBox.Show($"Cipher set point is not found for user for cipher serial number:{_cipherObj.serialNumber}\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            var usableCipherLen = 0;
+            if (!QuantumEncrypt.IsCipherLargeEnough(_unEncryptedBytes.Length, _cipherObj.cipherString, _cipherObj.startingPoint, ref usableCipherLen))
+            {
+                var reason = $"Cipher not large enough to encrypt file. ";
+
+                MessageBox.Show($"Cipher is not large enough to encrypt file. \n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
+
         }
 
         private async void btnDecrypt_Click(object sender, EventArgs e)
@@ -496,6 +537,8 @@ namespace QuantumConsoleDesktop
 
         private async void btnLoadSelectedCipher_Click(object sender, EventArgs e)
         {
+            btnLoadSelectedCipher.BackColor = Color.Empty;
+
             if (lvCipherList.SelectedItems == null || lvCipherList.SelectedItems.Count < 1)
             {
                 MessageBox.Show($"Please click to select a cipher above.\n\n", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

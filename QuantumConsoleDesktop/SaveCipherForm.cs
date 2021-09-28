@@ -25,7 +25,7 @@ namespace QuantumConsoleDesktop
             var idx = 0;
             QuantumEncrypt.CopyStringToByteArray(cipherObj.cipherString, ref _fileBytes, ref idx);
 
-            saveCipherModal.FileName = $"Cipher_{cipherObj.cipherString.Substring(0, 6)}" + ".cipher";
+            saveCipherModal.FileName = $"Cipher_{cipherObj.serialNumber.Substring(0, 6)}" + ".cipher";
             saveCipherModal.Filter = "QuantumLock Cipher Files (*.cipher)|*.cipher";
         }
 
